@@ -4,10 +4,12 @@ Official implementation of **Fast Generalizable Gaussian Splatting Reconstructio
 
 Authors: [Tianqi Liu](https://tqtqliu.github.io/), [Guangcong Wang](https://wanggcong.github.io/), [Shoukang Hu](https://skhu101.github.io/), [Liao Shen](https://leoshen917.github.io/), [Xinyi Ye](https://scholar.google.com/citations?user=g_Y0w7MAAAAJ), [Yuhang Zang](http://yuhangzang.github.io/), [Zhiguo Cao](http://english.aia.hust.edu.cn/info/1085/1528.htm), [Wei Li](https://weivision.github.io/), [Ziwei Liu](https://liuziwei7.github.io/)
 
-## [Project page](https://mvsgaussian.github.io/) | [Paper](https://arxiv.org/abs/2405.12218) 
+## [Project page](https://mvsgaussian.github.io/) | [Paper](https://arxiv.org/abs/2405.12218) | [YouTube](https://youtu.be/yzYVY7apyJE)
 
 
 Coming soon!
+
+>**TL;DR**: MVSGaussian is a Gaussian-based method designed for efficient reconstruction of unseen scenes from sparse views in a single forward pass. It offers high-quality initialization for fast training and real-time rendering.
 
 ## Introduction
 We present MVSGaussian, a new generalizable 3D Gaussian representation approach derived from Multi-View Stereo (MVS) that can efficiently reconstruct unseen scenes.
