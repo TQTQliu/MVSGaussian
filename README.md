@@ -2,9 +2,11 @@
 
 Official implementation of **Fast Generalizable Gaussian Splatting Reconstruction from Multi-View Stereo**
 
-Authors: [Tianqi Liu](https://tqtqliu.github.io/)<sup>1</sup>, [Guangcong Wang](https://wanggcong.github.io/)<sup>2,3</sup>, [Shoukang Hu](https://skhu101.github.io/)<sup>2</sup>, [Liao Shen](https://leoshen917.github.io/)<sup>1</sup>, [Xinyi Ye](https://scholar.google.com/citations?user=g_Y0w7MAAAAJ)<sup>1</sup>, [Yuhang Zang](http://yuhangzang.github.io/)<sup>4</sup>, [Zhiguo Cao](http://english.aia.hust.edu.cn/info/1085/1528.htm)<sup>1</sup>, [Wei Li](https://weivision.github.io/)<sup>2</sup>, [Ziwei Liu](https://liuziwei7.github.io/)<sup>2</sup>
+[Tianqi Liu](https://tqtqliu.github.io/)<sup>1</sup>, [Guangcong Wang](https://wanggcong.github.io/)<sup>2,3</sup>, [Shoukang Hu](https://skhu101.github.io/)<sup>2</sup>, [Liao Shen](https://leoshen917.github.io/)<sup>1</sup>, [Xinyi Ye](https://scholar.google.com/citations?user=g_Y0w7MAAAAJ)<sup>1</sup>, [Yuhang Zang](http://yuhangzang.github.io/)<sup>4</sup>, [Zhiguo Cao](http://english.aia.hust.edu.cn/info/1085/1528.htm)<sup>1</sup>, [Wei Li](https://weivision.github.io/)<sup>2</sup>, [Ziwei Liu](https://liuziwei7.github.io/)<sup>2</sup>
 
-<p><sup>1</sup>Huazhong University of Science and Technology &nbsp;&nbsp;<sup>2</sup>Nanyang Technological University &nbsp;&nbsp;<sup>3</sup>Great Bay University &nbsp;&nbsp; <sup>4</sup>Shanghai AI Laboratory
+<p><sup>1</sup>Huazhong University of Science and Technology &nbsp;&nbsp;<sup>2</sup>Nanyang Technological University &nbsp;&nbsp;
+
+<sup>3</sup>Great Bay University &nbsp;&nbsp; <sup>4</sup>Shanghai AI Laboratory
 
 ## [Project page](https://mvsgaussian.github.io/) | [Paper](https://arxiv.org/abs/2405.12218) | [Youtube](https://youtu.be/4TxMQ9RnHMA) 
 
