@@ -1,0 +1,23 @@
+parent_cfg: configs/mvsgs/dtu_pretrain.yaml
+
+train_dataset_module: lib.datasets.nerf.mvsgs
+test_dataset_module: lib.datasets.nerf.mvsgs
+
+mvsgs:
+    reweighting: True
+    cas_config:
+        render_if: [False, True]
+
+train_dataset:
+    data_root: 'nerf_synthetic'
+    input_h_w: [800, 800]
+    split: 'train'
+    batch_size: 1
+    input_ratio: 1.
+
+test_dataset:
+    data_root: 'nerf_synthetic'
+    input_h_w: [800, 800]
+    split: 'test'
+    batch_size: 1
+    input_ratio: 1.

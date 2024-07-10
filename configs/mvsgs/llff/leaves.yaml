@@ -1,0 +1,21 @@
+parent_cfg: configs/mvsgs/llff_eval.yaml
+exp_name: llff_ft_leaves
+
+mvsgs:
+    test_input_views: 4
+    train_input_views: [3, 4]
+    train_input_views_prob: [0.4, 0.6]
+    cas_config:
+        render_if: [True, True]
+train_dataset:
+    scene: leaves
+test_dataset:
+    scene: leaves
+train:
+    epoch: 233 # pretrained epoch +10
+    lr: 5e-5
+    sampler_meta:
+        input_views_num: [3, 4] 
+        input_views_prob: [0.4, 0.6]
+save_ep: 1
+eval_ep: 1

@@ -1,0 +1,12 @@
+parent_cfg: configs/mvsgs/dtu_pretrain.yaml
+exp_name: dtu_ft_scan1
+mvsgs:
+    test_input_views: 4
+train_dataset:
+    scene: scan1
+test_dataset:
+    scene: scan1
+train:
+    epoch: 233 # pretrained epoch +10
+save_ep: 1
+eval_ep: 1

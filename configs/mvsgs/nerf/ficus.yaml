@@ -1,0 +1,17 @@
+parent_cfg: configs/mvsgs/nerf_eval.yaml
+exp_name: nerf_ft_ficus
+mvsgs:
+    test_input_views: 3
+    train_input_views: [3, 4]
+    train_input_views_prob: [0.4, 0.6]
+    cas_config:
+        render_if: [True, True]
+train_dataset:
+    scene: ficus
+test_dataset:
+    scene: ficus
+train:
+    epoch: 233 # pretrained epoch +10
+    lr: 1e-6
+save_ep: 1
+eval_ep: 1

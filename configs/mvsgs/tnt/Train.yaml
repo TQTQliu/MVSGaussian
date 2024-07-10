@@ -1,0 +1,17 @@
+parent_cfg: configs/mvsgs/tnt_eval.yaml
+exp_name: tnt_ft_train
+mvsgs:
+    test_input_views: 4
+    train_input_views: [3, 4]
+    train_input_views_prob: [0.4, 0.6]
+    cas_config:
+        render_if: [True, True]
+train_dataset:
+    scene: Train
+test_dataset:
+    scene: Train
+train:
+    epoch: 233 # pretrained epoch +10
+    lr: 5e-5
+save_ep: 1
+eval_ep: 1

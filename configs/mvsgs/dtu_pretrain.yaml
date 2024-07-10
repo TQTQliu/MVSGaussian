@@ -1,0 +1,91 @@
+task: mvsgs
+gpus: [0]
+exp_name: 'dtu_pretrain'
+
+
+# module
+train_dataset_module: lib.datasets.dtu.mvsgs
+test_dataset_module: lib.datasets.dtu.mvsgs
+network_module: lib.networks.mvsgs.network
+loss_module: lib.train.losses.mvsgs
+evaluator_module: lib.evaluators.mvsgs
+
+save_result: True
+eval_lpips: True
+save_video: False
+save_ply: False
+dir_ply: 'mvsgs_pointcloud'
+
+# task config
+mvsgs:
+    train_input_views: [2, 3, 4]
+    train_input_views_prob: [0.1, 0.8, 0.1]
+    test_input_views: 3
+    viewdir_agg: True 
+    chunk_size: 1000000
+    eval_depth: False
+    eval_center: False
+    reweighting: False
+    bg_color: [0,0,0]
+    cas_config:
+        num: 2
+        depth_inv: [True, False]
+        volume_scale: [0.125, 0.5]
+        volume_planes: [64, 8]
+        im_feat_scale: [0.25, 0.5]
+        im_ibr_scale: [0.25, 1.]
+        render_scale: [0.25, 1.0]
+        render_im_feat_level: [0, 2]
+        gs_model_feat_ch: [32, 8]
+        render_if: [True, True]
+        num_samples: [1, 1] # 
+        num_rays: [4096, 32768] # 
+        num_patchs: [0, 0] # 
+        train_img: [True, True]
+        patch_size: [-1, -1] #
+        loss_weight: [0.5, 1.]
+
+
+train_dataset:
+    data_root: 'mvs_training/dtu/' #
+    ann_file: 'data/mvsnerf/dtu_train_all.txt'
+    split: 'train'
+    batch_size: 1
+    input_ratio: 1.
+
+test_dataset:
+    data_root: 'mvs_training/dtu/' #
+    ann_file: 'data/mvsnerf/dtu_val_all.txt'
+    split: 'test'
+    batch_size: 1
+    input_ratio: 1.
+
+train:
+    batch_size: 1
+    lr: 5e-4
+    weight_decay: 0.
+    epoch: 300
+    scheduler:
+        type: 'exponential'
+        gamma: 0.5
+        decay_epochs: 50
+    batch_sampler: 'mvsgs'
+    collator: 'mvsgs' 
+    sampler_meta:
+        input_views_num: [2, 3, 4] 
+        input_views_prob: [0.1, 0.8, 0.1]
+    num_workers: 4
+
+test:
+    batch_size: 1
+    collator: 'mvsgs' 
+    batch_sampler: 'mvsgs'
+    sampler_meta:
+        input_views_num: [3] 
+        input_views_prob: [1.]
+
+ep_iter: 1000
+save_ep: 1
+eval_ep: 1
+save_latest_ep: 1
+log_interval: 1
