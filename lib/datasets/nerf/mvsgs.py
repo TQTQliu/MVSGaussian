@@ -34,7 +34,7 @@ class Dataset:
             scenes = self.scenes
         self.scene_infos = {}
         self.metas = []
-        pairs = torch.load('data/mvsnerf/pairs.th')
+        pairs = torch.load('data/mvsgs/pairs.th')
         for scene in scenes:
             json_info = json.load(open(os.path.join(self.data_root, scene,'transforms_train.json')))
             b2c = np.array([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
@@ -101,45 +101,26 @@ class Dataset:
         
         R = np.array(tar_ext[:3, :3], np.float32).reshape(3, 3).transpose(1, 0)
         T = np.array(tar_ext[:3, 3], np.float32)
-        FovX = data_utils.focal2fov(tar_ixt[0, 0], W)
-        FovY = data_utils.focal2fov(tar_ixt[1, 1], H)
-        projection_matrix = data_utils.getProjectionMatrix(znear=self.znear, zfar=self.zfar, K=tar_ixt, h=H, w=W).transpose(0, 1)
-        world_view_transform = torch.tensor(data_utils.getWorld2View2(R, T, np.array(self.trans), self.scale)).transpose(0, 1)
-        full_proj_transform = (world_view_transform.unsqueeze(0).bmm(projection_matrix.unsqueeze(0))).squeeze(0)
-        camera_center = world_view_transform.inverse()[3, :3]
-
-        novel_view_data = {
-            'FovX': FovX,
-            'FovY': FovY,
-            'width': W,
-            'height': H,
-            'world_view_transform': world_view_transform,
-            'full_proj_transform': full_proj_transform,
-            'camera_center': camera_center
-        }
-        ret['novel_view1'] = novel_view_data
-        
-        R = np.array(tar_ext[:3, :3], np.float32).reshape(3, 3).transpose(1, 0)
-        T = np.array(tar_ext[:3, 3], np.float32)
-        tar_ixt_ = tar_ixt.copy()
-        tar_ixt_[:2,:] *= 1/4
-        FovX1 = data_utils.focal2fov(tar_ixt_[0, 0], W//4)
-        FovY1 = data_utils.focal2fov(tar_ixt_[1, 1], H//4)
-        projection_matrix1 = data_utils.getProjectionMatrix(znear=self.znear, zfar=self.zfar, K=tar_ixt_, h=H//4, w=W//4).transpose(0, 1)
-        world_view_transform1 = torch.tensor(data_utils.getWorld2View2(R, T, np.array(self.trans), self.scale)).transpose(0, 1)
-        full_proj_transform1 = (world_view_transform1.unsqueeze(0).bmm(projection_matrix1.unsqueeze(0))).squeeze(0)
-        camera_center1 = world_view_transform1.inverse()[3, :3]
-
-        novel_view_data0 = {
-            'FovX': FovX1,
-            'FovY': FovY1,
-            'width': W//4,
-            'height': H//4,
-            'world_view_transform': world_view_transform1,
-            'full_proj_transform': full_proj_transform1,
-            'camera_center': camera_center1
-        }
-        ret['novel_view0'] = novel_view_data0
+        for i in range(cfg.mvsgs.cas_config.num):
+            h, w = H*cfg.mvsgs.cas_config.render_scale[i], W*cfg.mvsgs.cas_config.render_scale[i]
+            tar_ixt_ = tar_ixt.copy()
+            tar_ixt_[:2,:] *= cfg.mvsgs.cas_config.render_scale[i]
+            FovX = data_utils.focal2fov(tar_ixt_[0, 0], w)
+            FovY = data_utils.focal2fov(tar_ixt_[1, 1], h)
+            projection_matrix = data_utils.getProjectionMatrix(znear=self.znear, zfar=self.zfar, K=tar_ixt_, h=h, w=w).transpose(0, 1)
+            world_view_transform = torch.tensor(data_utils.getWorld2View2(R, T, np.array(self.trans), self.scale)).transpose(0, 1)
+            full_proj_transform = (world_view_transform.unsqueeze(0).bmm(projection_matrix.unsqueeze(0))).squeeze(0)
+            camera_center = world_view_transform.inverse()[3, :3]
+            novel_view_data = {
+                'FovX':  torch.FloatTensor([FovX]),
+                'FovY':  torch.FloatTensor([FovY]),
+                'width': w,
+                'height': h,
+                'world_view_transform': world_view_transform,
+                'full_proj_transform': full_proj_transform,
+                'camera_center': camera_center
+            }
+            ret[f'novel_view{i}'] = novel_view_data    
         
         if cfg.save_video:
             rendering_video_meta = []

@@ -48,14 +48,14 @@ mvsgs:
 
 train_dataset:
     data_root: 'mvs_training/dtu/' #
-    ann_file: 'data/mvsnerf/dtu_train_all.txt'
+    ann_file: 'data/mvsgs/dtu_train_all.txt'
     split: 'train'
     batch_size: 1
     input_ratio: 1.
 
 test_dataset:
     data_root: 'mvs_training/dtu/' #
-    ann_file: 'data/mvsnerf/dtu_val_all.txt'
+    ann_file: 'data/mvsgs/dtu_val_all.txt'
     split: 'test'
     batch_size: 1
     input_ratio: 1.

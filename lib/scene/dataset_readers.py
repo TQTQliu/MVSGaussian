@@ -168,7 +168,7 @@ def readColmapSceneInfo_LLFF(path, init_ply=None, video=False, scale_factor=12):
                                 path=path, rgb_mapping=rgb_mapping)
     cam_infos = sorted(cam_infos_unsorted.copy(), key = lambda x : x.image_name)
     
-    pairs = torch.load('data/mvsnerf/pairs.th')
+    pairs = torch.load('data/mvsgs/pairs.th')
     scene = path.split('/')[-1]
     train_ids = pairs[f'{scene}_train']
     render_ids = pairs[f'{scene}_val']
@@ -276,7 +276,7 @@ def readNerfSyntheticInfo(path, white_background, eval, extension=".png", init_p
         cam_infos = readCamerasFromTransforms(path, "transforms_train.json", white_background, extension, scale_factor=scale_factor)
     else:
         cam_infos = readCamerasFromTransforms(path, "transforms_train.json", white_background, extension)
-    pairs = torch.load('data/mvsnerf/pairs.th')
+    pairs = torch.load('data/mvsgs/pairs.th')
     scene = path.split('/')[-1]
     train_ids, render_ids = pairs[f'{scene}_train'], pairs[f'{scene}_val']
     train_cam_infos = [cam_infos[idx] for idx in train_ids]
@@ -381,7 +381,7 @@ def readColmapSceneInfo_TNT(path, init_ply=None, scale_factor = 500):
                                 path=path, rgb_mapping=rgb_mapping, init_ply=init_ply)
     cam_infos = sorted(cam_infos_unsorted.copy(), key = lambda x : x.image_name)
         
-    pairs = torch.load('data/mvsnerf/pairs.th')
+    pairs = torch.load('data/mvsgs/pairs.th')
     scene = path.split('/')[-1]
     train_ids = pairs[f'{scene}_train']
     render_ids = pairs[f'{scene}_test']
