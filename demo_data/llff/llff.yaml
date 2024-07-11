@@ -1,0 +1,5 @@
+volume_planes: [16, 8]
+scale_factor: 12
+reweighting: True
+eval_center: True
+render_if: [False, True]

@@ -1,4 +1,4 @@
-<h2 align="center" width="100%">
+﻿<h2 align="center" width="100%">
 MVSGaussian: Fast Generalizable Gaussian Splatting Reconstruction from Multi-View Stereo
 </h2>
 <div>
@@ -45,6 +45,7 @@ MVSGaussian: Fast Generalizable Gaussian Splatting Reconstruction from Multi-Vie
 </div>
 
 ## ⚡ Updates
++ [2024.07.11] Add a simple demo to help with custom data.
 + [2024.07.10] Code and checkpoint are released.
 + [2024.07.01] Our work is accepted by ECCV2024.
 + [2024.05.21] **[Project Page](https://mvsgaussian.github.io/) |  **[arXiv](https://arxiv.org/abs/2405.12218)** | [YouTube](https://youtu.be/4TxMQ9RnHMA)** released.
@@ -98,6 +99,7 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
 
 + Download [NeRF Synthetic](https://drive.google.com/drive/folders/1WAeA7-Ktr9-sFDmoNYgmL3wt8Ltm7-Ys?usp=sharing), [Real Forward-facing](https://drive.google.com/drive/folders/1rciqkjLQEBnoT3lrXWfsJW3s3dHdrV9e?usp=sharing), and [Tanks and Temples](https://drive.google.com/drive/folders/15Q-N5SrD96i3YmQv0EgmzwJj80IBeYhQ?usp=sharing) datasets.
 
+
 ## 🚂 Training
 + Train generalizable model
 
@@ -105,6 +107,7 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
   ```
   python train_net.py --cfg_file configs/mvsgs/dtu_pretrain.yaml 
   ```
+  You can specify the `gpus` in `configs/mvsgs/dtu_pretrain.yaml`.
 
   Our code also supports multi-gpu training. The released pretrained model was trained with 4 RTX 3090 GPUs.
   ```
@@ -145,6 +148,14 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
   ```
 
 ## 🎯 Evaluation
+
++ 🤗 Play with demo
+  We offer a simple demo that, given multi-view images along with their camera parameters (which can be obtained through COLMAP), the model can generate target views based on user-specified viewpoints.
+
+  ``` 
+  python demo.py
+  ```
+
 + Evaluation on DTU
 
   Download the [pretrained model](https://drive.google.com/drive/folders/1Eh2hREvZud6aJ7Rer2HoFTnQTUR3img7?usp=sharing) and put it into `trained_model/mvsgs/dtu_pretrain/latest.pth`
