@@ -151,7 +151,7 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
 
 + 🤗 Play with demo
   
-  We offer a simple demo that, given multi-view images along with their camera parameters (which can be obtained through COLMAP), the model can generate target views based on user-specified viewpoints.
+  We offer a simple demo that, given multi-view images along with their camera parameters (which can be obtained through COLMAP), the generalizable model can generate target views based on user-specified viewpoints.
 
   ``` 
   python demo.py
