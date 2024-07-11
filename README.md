@@ -45,10 +45,10 @@ MVSGaussian: Fast Generalizable Gaussian Splatting Reconstruction from Multi-Vie
 </div>
 
 ## ⚡ Updates
-+ [2024.07.11] Add a simple demo to help with custom data.
++ [2024.07.11] Add a simple **[demo](https://github.com/TQTQliu/MVSGaussian/blob/ae6817432f919fc8e8491a2797f3123119b764a9/README.md?plain=1#L152)** to help with custom data.
 + [2024.07.10] Code and checkpoint are released.
 + [2024.07.01] Our work is accepted by ECCV2024.
-+ [2024.05.21] **[Project Page](https://mvsgaussian.github.io/) |  **[arXiv](https://arxiv.org/abs/2405.12218)** | [YouTube](https://youtu.be/4TxMQ9RnHMA)** released.
++ [2024.05.21] **[Project Page](https://mvsgaussian.github.io/)** |  **[arXiv](https://arxiv.org/abs/2405.12218)** | **[YouTube](https://youtu.be/4TxMQ9RnHMA)** released.
 
 
 ## 🌟 Abstract
