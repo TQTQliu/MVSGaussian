@@ -1,4 +1,4 @@
-﻿<h2 align="center" width="100%">
+<h2 align="center" width="100%">
 MVSGaussian: Fast Generalizable Gaussian Splatting Reconstruction from Multi-View Stereo
 </h2>
 <div>
@@ -46,7 +46,7 @@ MVSGaussian: Fast Generalizable Gaussian Splatting Reconstruction from Multi-Vie
 
 ## ⚡ Updates
 + [2024.07.16] The latest updated code supports multi-batch training (**[details](https://github.com/TQTQliu/MVSGaussian#-training)**) and inference, and **a single 3090 GPU** is sufficient to reproduce all of our experimental results.
-+ [2024.07.16] Added a **[Demo (Custom Data)](https://github.com/TQTQliu/MVSGaussian/tree/main?tab=readme-ov-file#-demo-custom-data)** that only requires multi-view images as input.
++ [2024.07.16] Added a **[Demo (Custom Data)](https://github.com/TQTQliu/tmp?tab=readme-ov-file#-demo-custom-data)** that only requires multi-view images as input.
 + [2024.07.10] Code and checkpoints are released.
 + [2024.07.01] Our work is accepted by ECCV2024.
 + [2024.05.21] **[Project Page](https://mvsgaussian.github.io/)** |  **[arXiv](https://arxiv.org/abs/2405.12218)** | **[YouTube](https://youtu.be/4TxMQ9RnHMA)** released.
@@ -61,14 +61,14 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
 
 
 ## 🔨 Installation
-+ Clone our repository
+### Clone our repository
 
   ```
   git clone https://github.com/TQTQliu/MVSGaussian.git
   cd MVSGaussian
   ```
 
-+ Set up the python environment
+### Set up the python environment
 
   ```
   conda create -n mvsgs python=3.7.13
@@ -77,7 +77,7 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
   pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 -f https://download.pytorch.org/whl/torch_stable.html
   ```
 
-+ Install [Gaussian Splatting](https://github.com/graphdeco-inria/gaussian-splatting) renderer
+### Install [Gaussian Splatting](https://github.com/graphdeco-inria/gaussian-splatting) renderer
   ```
   git clone https://github.com/graphdeco-inria/gaussian-splatting --recursive
   pip install gaussian-splatting/submodules/diff-gaussian-rasterization
@@ -117,7 +117,7 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
 
 
 ## 🚂 Training
-+ Train generalizable model
+### Train generalizable model
 
   To train a generalizable model from scratch on DTU, specify ``data_root`` in ``configs/mvsgs/dtu_pretrain.yaml`` first and then run:
   ```
@@ -134,7 +134,6 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
   python -m torch.distributed.launch --nproc_per_node=4 train_net.py --cfg_file configs/mvsgs/dtu_pretrain.yaml distributed True gpus 0,1,2,3 train.batch_size 4
   ```
   We provide the results as a **reference** below:
-
   <table>
   <tr>
     <th align="center" rowspan=2>GPU number</th>
@@ -219,8 +218,9 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
     <td align="center"><a href="https://drive.google.com/drive/folders/1lvXz6dP1NlVQEx5vvnGRcqaiWHnjVc_X?usp=sharing">4gpu_4batch</a></td>
   </tr>
 </table>
-  
-+ Per-scene optimization
+
+
+### Per-scene optimization
 
   One strategy is to optimize only the initial Gaussian point cloud provided by the generalizable model.
 
@@ -255,7 +255,7 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
 
 ## 🎯 Evaluation
 
-+ Evaluation on DTU
+### Evaluation on DTU
 
   Download the [pretrained model](https://drive.google.com/drive/folders/1Eh2hREvZud6aJ7Rer2HoFTnQTUR3img7?usp=sharing) and put it into `trained_model/mvsgs/dtu_pretrain/latest.pth`
 
@@ -265,31 +265,31 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
   ```
   The rendered images will be saved in ```result/mvsgs/dtu_pretrain```. 
 
-+ Evaluation on Real Forward-facing
+### Evaluation on Real Forward-facing
 
   ```
   python run.py --type evaluate --cfg_file configs/mvsgs/llff_eval.yaml
   ```
 
-+ Evaluation on NeRF Synthetic
+### Evaluation on NeRF Synthetic
 
   ```
   python run.py --type evaluate --cfg_file configs/mvsgs/nerf_eval.yaml
   ```
 
-+ Evaluation on Tanks and Temples
+### Evaluation on Tanks and Temples
 
   ```
   python run.py --type evaluate --cfg_file configs/mvsgs/tnt_eval.yaml
   ```
-+ Render videos
+### Render videos
 
-  Add the ```save_video True``` argument to save videos, such as:
+Add the ```save_video True``` argument to save videos, such as:
   ```
   python run.py --type evaluate --cfg_file configs/mvsgs/llff_eval.yaml save_video True
   ``` 
 
-  For optimized Gaussians, add `-v` to save videos, such as:
+For optimized Gaussians, add `-v` to save videos, such as:
   ```
   python lib/render.py -m output/$scene -p $dir_ply -v
   ``` 
