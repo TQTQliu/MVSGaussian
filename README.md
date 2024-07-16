@@ -46,7 +46,7 @@ MVSGaussian: Fast Generalizable Gaussian Splatting Reconstruction from Multi-Vie
 
 ## ⚡ Updates
 + [2024.07.16] The latest updated code supports multi-batch training (**[details](https://github.com/TQTQliu/MVSGaussian#-training)**) and inference, and **a single 3090 GPU** is sufficient to reproduce all of our experimental results.
-+ [2024.07.16] Added a **[Demo (Custom Data)](https://github.com/TQTQliu/tmp?tab=readme-ov-file#-demo-custom-data)** that only requires multi-view images as input.
++ [2024.07.16] Added a **[Demo (Custom Data)](https://github.com/TQTQliu/MVSGaussian#-demo-custom-data)** that only requires multi-view images as input.
 + [2024.07.10] Code and checkpoints are released.
 + [2024.07.01] Our work is accepted by ECCV2024.
 + [2024.05.21] **[Project Page](https://mvsgaussian.github.io/)** |  **[arXiv](https://arxiv.org/abs/2405.12218)** | **[YouTube](https://youtu.be/4TxMQ9RnHMA)** released.
@@ -138,13 +138,13 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
   <tr>
     <th align="center" rowspan=2>GPU number</th>
     <th align="center" rowspan=2>Batch size</th>
+    <th align="center" rowspan=2>Checkpoint</th>
     <th align="center" colspan=3>DTU</th>
     <th align="center" colspan=3>Real Forward-facing</th>
     <th align="center" colspan=3>NeRF Synthetic</th>
     <th align="center" colspan=3>Tanks and Temples</th>
     <th align="center" rowspan=2>Training time (per epoch)</th>
     <th align="center" rowspan=2>Training memory </th>
-    <th align="center" rowspan=2>Checkpoint</th>
   </tr>
   <tr>
     <th align="center">PSNR</th>
@@ -163,6 +163,7 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
   <tr>
     <td align="center">1</td>
     <td align="center">4</td>
+    <td align="center"><a href="https://drive.google.com/drive/folders/16mzCq00juiPTntvZ5clt6P117VQfN84o?usp=sharing">1gpu_4batch</a></td>
     <td align="center">28.23</td>
     <td align="center">0.963</td>
     <td align="center">0.075</td>
@@ -177,11 +178,11 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
     <td align="center">0.137</td>
     <td align="center">~12min</td>
     <td align="center">~22G</td>
-    <td align="center"><a href="https://drive.google.com/drive/folders/16mzCq00juiPTntvZ5clt6P117VQfN84o?usp=sharing">1gpu_4batch</a></td>
   </tr>
   <tr>
     <td align="center">4</td>
     <td align="center">1</td>
+    <td align="center"><a href="https://drive.google.com/drive/folders/1to-JNQHP5wU3ux7m6sZKS6tSmfgGLviT?usp=sharing">4gpu_1batch (paper)</a></td>
     <td align="center">28.21</td>
     <td align="center">0.963</td>
     <td align="center">0.076</td>
@@ -196,11 +197,11 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
     <td align="center">0.139</td>
     <td align="center">~5min</td>
     <td align="center">~7G</td>
-    <td align="center"><a href="https://drive.google.com/drive/folders/1to-JNQHP5wU3ux7m6sZKS6tSmfgGLviT?usp=sharing">4gpu_1batch (paper)</a></td>
   </tr>
   <tr>
     <td align="center">4</td>
     <td align="center">4</td>
+    <td align="center"><a href="https://drive.google.com/drive/folders/1lvXz6dP1NlVQEx5vvnGRcqaiWHnjVc_X?usp=sharing">4gpu_4batch</a></td>
     <td align="center">28.56</td>
     <td align="center">0.964</td>
     <td align="center">0.073</td>
@@ -215,7 +216,6 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
     <td align="center">0.147</td>
     <td align="center">~14min</td>
     <td align="center">~23G</td>
-    <td align="center"><a href="https://drive.google.com/drive/folders/1lvXz6dP1NlVQEx5vvnGRcqaiWHnjVc_X?usp=sharing">4gpu_4batch</a></td>
   </tr>
 </table>
 
