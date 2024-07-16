@@ -45,8 +45,9 @@ MVSGaussian: Fast Generalizable Gaussian Splatting Reconstruction from Multi-Vie
 </div>
 
 ## ⚡ Updates
-+ [2024.07.11] Add a simple **[demo](https://github.com/TQTQliu/MVSGaussian#-evaluation)** to help with custom data.
-+ [2024.07.10] Code and checkpoint are released.
++ [2024.07.16] The latest updated code supports multi-batch training (**[details](https://github.com/TQTQliu/MVSGaussian#-training)**) and inference, and **a single 3090 GPU** is sufficient to reproduce all of our experimental results.
++ [2024.07.16] Added a **[Demo (Custom Data)](https://github.com/TQTQliu/tmp?tab=readme-ov-file#-demo-custom-data)** that only requires multi-view images as input.
++ [2024.07.10] Code and checkpoints are released.
 + [2024.07.01] Our work is accepted by ECCV2024.
 + [2024.05.21] **[Project Page](https://mvsgaussian.github.io/)** |  **[arXiv](https://arxiv.org/abs/2405.12218)** | **[YouTube](https://youtu.be/4TxMQ9RnHMA)** released.
 
@@ -83,6 +84,21 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
   pip install gaussian-splatting/submodules/simple-knn
   ```
 
+
+## 🤗 Demo (Custom Data)
+
+  First, prepare the multi-view image data, and then run colmap. Here, we take `examples/scene1` ([examples data](https://drive.google.com/drive/folders/1S-Ke5ZI3tfNpuSkumJ1R7LFbb_I8oArD?usp=sharing)) as an example:
+  ```
+  python lib/colmap/imgs2poses.py -s examples/scene1
+  ```
+  And execute the following command to obtain novel views:
+  ```
+  python run.py --type evaluate --cfg_file configs/mvsgs/colmap_eval.yaml test_dataset.data_root examples/scene1
+  ```
+  or videos:
+  ```
+  python run.py --type evaluate --cfg_file configs/mvsgs/colmap_eval.yaml test_dataset.data_root examples/scene1 save_video True
+  ```
 ## 📦 Datasets
 
 + DTU
@@ -105,15 +121,105 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
 
   To train a generalizable model from scratch on DTU, specify ``data_root`` in ``configs/mvsgs/dtu_pretrain.yaml`` first and then run:
   ```
-  python train_net.py --cfg_file configs/mvsgs/dtu_pretrain.yaml 
+  python train_net.py --cfg_file configs/mvsgs/dtu_pretrain.yaml train.batch_size 4
   ```
   You can specify the `gpus` in `configs/mvsgs/dtu_pretrain.yaml`.
 
-  Our code also supports multi-gpu training. The released pretrained model was trained with 4 RTX 3090 GPUs.
+  Our code also supports multi-gpu training. The released pretrained model (paper) was trained with 4 RTX 3090 GPUs with a batch size of 1 for each GPU:
   ```
-  python -m torch.distributed.launch --nproc_per_node=4 train_net.py --cfg_file configs/mvsgs/dtu_pretrain.yaml distributed True gpus 0,1,2,3
+  python -m torch.distributed.launch --nproc_per_node=4 train_net.py --cfg_file configs/mvsgs/dtu_pretrain.yaml distributed True gpus 0,1,2,3 train.batch_size 1
   ```
+  You can also use 4 GPUs, with a batch size of 4 for each GPU:
+  ```
+  python -m torch.distributed.launch --nproc_per_node=4 train_net.py --cfg_file configs/mvsgs/dtu_pretrain.yaml distributed True gpus 0,1,2,3 train.batch_size 4
+  ```
+  We provide the results as a **reference** below:
 
+  <table>
+  <tr>
+    <th align="center" rowspan=2>GPU number</th>
+    <th align="center" rowspan=2>Batch size</th>
+    <th align="center" colspan=3>DTU</th>
+    <th align="center" colspan=3>Real Forward-facing</th>
+    <th align="center" colspan=3>NeRF Synthetic</th>
+    <th align="center" colspan=3>Tanks and Temples</th>
+    <th align="center" rowspan=2>Training time (per epoch)</th>
+    <th align="center" rowspan=2>Training memory </th>
+    <th align="center" rowspan=2>Checkpoint</th>
+  </tr>
+  <tr>
+    <th align="center">PSNR</th>
+    <th align="center">SSIM</th>
+    <th align="center">LPIPS</th>
+    <th align="center">PSNR</th>
+    <th align="center">SSIM</th>
+    <th align="center">LPIPS</th>
+    <th align="center">PSNR</th>
+    <th align="center">SSIM</th>
+    <th align="center">LPIPS</th>
+    <th align="center">PSNR</th>
+    <th align="center">SSIM</th>
+    <th align="center">LPIPS</th>
+  </tr>
+  <tr>
+    <td align="center">1</td>
+    <td align="center">4</td>
+    <td align="center">28.23</td>
+    <td align="center">0.963</td>
+    <td align="center">0.075</td>
+    <td align="center">24.19</td>
+    <td align="center">0.860</td>
+    <td align="center">0.164</td>
+    <td align="center">26.57</td>
+    <td align="center">0.948</td>
+    <td align="center">0.070</td>
+    <td align="center">23.50</td>
+    <td align="center">0.879</td>
+    <td align="center">0.137</td>
+    <td align="center">~12min</td>
+    <td align="center">~22G</td>
+    <td align="center"><a href="https://drive.google.com/drive/folders/16mzCq00juiPTntvZ5clt6P117VQfN84o?usp=sharing">1gpu_4batch</a></td>
+  </tr>
+  <tr>
+    <td align="center">4</td>
+    <td align="center">1</td>
+    <td align="center">28.21</td>
+    <td align="center">0.963</td>
+    <td align="center">0.076</td>
+    <td align="center">24.07</td>
+    <td align="center">0.857</td>
+    <td align="center">0.164</td>
+    <td align="center">26.46</td>
+    <td align="center">0.948</td>
+    <td align="center">0.071</td>
+    <td align="center">23.29</td>
+    <td align="center">0.878</td>
+    <td align="center">0.139</td>
+    <td align="center">~5min</td>
+    <td align="center">~7G</td>
+    <td align="center"><a href="https://drive.google.com/drive/folders/1to-JNQHP5wU3ux7m6sZKS6tSmfgGLviT?usp=sharing">4gpu_1batch (paper)</a></td>
+  </tr>
+  <tr>
+    <td align="center">4</td>
+    <td align="center">4</td>
+    <td align="center">28.56</td>
+    <td align="center">0.964</td>
+    <td align="center">0.073</td>
+    <td align="center">24.02</td>
+    <td align="center">0.858</td>
+    <td align="center">0.165</td>
+    <td align="center">26.28</td>
+    <td align="center">0.947</td>
+    <td align="center">0.072</td>
+    <td align="center">23.14</td>
+    <td align="center">0.876</td>
+    <td align="center">0.147</td>
+    <td align="center">~14min</td>
+    <td align="center">~23G</td>
+    <td align="center"><a href="https://drive.google.com/drive/folders/1lvXz6dP1NlVQEx5vvnGRcqaiWHnjVc_X?usp=sharing">4gpu_4batch</a></td>
+  </tr>
+</table>
+  
 + Per-scene optimization
 
   One strategy is to optimize only the initial Gaussian point cloud provided by the generalizable model.
@@ -148,14 +254,6 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
   ```
 
 ## 🎯 Evaluation
-
-+ 🤗 Play with demo
-  
-  We offer a simple demo that, given multi-view images along with their camera parameters (which can be obtained through COLMAP), the generalizable model can generate target views based on user-specified viewpoints.
-
-  ``` 
-  python demo.py
-  ```
 
 + Evaluation on DTU
 
@@ -211,7 +309,7 @@ If you find our work useful for your research, please cite our paper.
 ```
 
 ## 😃 Acknowledgement
-This project is built on source codes shared by [Gaussian-Splatting](https://github.com/graphdeco-inria/gaussian-splatting), [ENeRF](https://github.com/zju3dv/enerf/), and [MVSNeRF](https://github.com/apchenstu/mvsnerf). Many thanks for their excellent contributions!
+This project is built on source codes shared by [Gaussian-Splatting](https://github.com/graphdeco-inria/gaussian-splatting), [ENeRF](https://github.com/zju3dv/enerf/), [MVSNeRF](https://github.com/apchenstu/mvsnerf) and [LLFF](https://github.com/Fyusion/LLFF). Many thanks for their excellent contributions!
 
 ## 📧 Contact
 If you have any questions, please feel free to contact Tianqi Liu <b>(tq_liu at hust.edu.cn)</b>.

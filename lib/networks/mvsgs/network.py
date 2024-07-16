@@ -93,7 +93,6 @@ class Network(nn.Module):
                 if not cfg.mvsgs.cas_config.render_if[i]:
                     continue
                 rays = utils.build_rays(depth, std, batch, self.training, near_far, i)
-                # UV(2) +  ray_o (3) + ray_d (3) + ray_near_far (2) + volume_near_far (2)
                 im_feat_level = cfg.mvsgs.cas_config.render_im_feat_level[i]
                 output = self.batchify_rays(
                         rays=rays,
@@ -106,13 +105,16 @@ class Network(nn.Module):
                         )
                 ret_i = {}
                 world_xyz, rot_out, scale_out, opacity_out, color_out, rgb_vr = output
-                b_i = 0
-                render_novel_i_0 = render(batch[f'novel_view{i}'], b_i, world_xyz[b_i], color_out[b_i], rot_out[b_i], scale_out[b_i], opacity_out[b_i], bg_color=cfg.mvsgs.bg_color)
-                if cfg.mvsgs.reweighting: 
-                    render_novel_i = (render_novel_i_0 + rgb_vr*4) / 5
-                else:
-                    render_novel_i = (render_novel_i_0 + rgb_vr) / 2
-                ret_i.update({'rgb': render_novel_i.flatten(1).permute(1,0).unsqueeze(0)})
+                render_novel = []
+                for b_i in range(B):
+                    render_novel_i_0 = render(batch[f'novel_view{i}'], b_i, world_xyz[b_i], color_out[b_i], rot_out[b_i], scale_out[b_i], opacity_out[b_i], bg_color=cfg.mvsgs.bg_color)
+                    if cfg.mvsgs.reweighting: 
+                        render_novel_i = (render_novel_i_0 + rgb_vr[b_i]*4) / 5
+                    else:
+                        render_novel_i = (render_novel_i_0 + rgb_vr[b_i]) / 2
+                    render_novel.append(render_novel_i)
+                render_novel = torch.stack(render_novel)
+                ret_i.update({'rgb': render_novel.flatten(2).permute(0,2,1)})
                 if cfg.mvsgs.cas_config.depth_inv[i]:
                     ret_i.update({'depth_mvs': 1./depth})
                 else:
@@ -125,49 +127,47 @@ class Network(nn.Module):
                 if cfg.save_ply:
                     result_dir = cfg.dir_ply
                     os.makedirs(result_dir, exist_ok = True)
-                    scan_dir = os.path.join(result_dir, batch['meta']['scene'][0])
-                    os.makedirs(scan_dir, exist_ok = True)
-                    img_dir = os.path.join(scan_dir, 'images')
-                    os.makedirs(img_dir, exist_ok = True)
-                    img_path = os.path.join(img_dir, '{}_{}_{}.png'.format(batch['meta']['scene'][0], batch['meta']['tar_view'][0].item(), batch['meta']['frame_id'][0].item()))
-                    img = render_novel_i.permute(1,2,0).detach().cpu().numpy()
-                    img = (img*255).astype(np.uint8)
-                    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-                    cv2.imwrite(img_path, img)
-                    
-                    cam_dir = os.path.join(scan_dir, 'cam')
-                    os.makedirs(cam_dir, exist_ok = True)
-                    cam_path = os.path.join(cam_dir, '{}_{}_{}.txt'.format(batch['meta']['scene'][0], batch['meta']['tar_view'][0].item(), batch['meta']['frame_id'][0].item()))
-                    ixt = batch['tar_ixt'].detach().cpu().numpy()[0]
-                    ext = batch['tar_ext'].detach().cpu().numpy()[0]
-                    write_cam(cam_path, ixt, ext)
-                    
                     depth = F.interpolate(depth.unsqueeze(1),size=(H,W)).squeeze(1)
-                    depth_dir = os.path.join(scan_dir, 'depth')
-                    os.makedirs(depth_dir, exist_ok = True)
-                    depth_path = os.path.join(depth_dir, '{}_{}_{}.pfm'.format(batch['meta']['scene'][0], batch['meta']['tar_view'][0].item(), batch['meta']['frame_id'][0].item()))
-                    depth = depth.detach().cpu().numpy()[0]
-                    save_pfm(depth_path, depth)
+                    for b_i in range(B):
+                        scan_dir = os.path.join(result_dir, batch['meta']['scene'][b_i])
+                        os.makedirs(scan_dir, exist_ok = True)
+                        img_dir = os.path.join(scan_dir, 'images')
+                        os.makedirs(img_dir, exist_ok = True)
+                        img_path = os.path.join(img_dir, '{}_{}_{}.png'.format(batch['meta']['scene'][b_i], batch['meta']['tar_view'][b_i].item(), batch['meta']['frame_id'][b_i].item()))
+                        img = render_novel[b_i].permute(1,2,0).detach().cpu().numpy()
+                        img = (img*255).astype(np.uint8)
+                        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+                        cv2.imwrite(img_path, img)
                     
-                    depth_minmax = [
-                        batch["near_far"].min().detach().cpu().numpy(),
-                        batch["near_far"].max().detach().cpu().numpy(),
-                    ]
-                    rendered_depth_vis, _ = visualize_depth(depth, depth_minmax)
-                    rendered_depth_vis = rendered_depth_vis.permute(1,2,0).detach().cpu().numpy()
-                    depth_vis_path = os.path.join(depth_dir, '{}_{}_{}.png'.format(batch['meta']['scene'][0], batch['meta']['tar_view'][0].item(), batch['meta']['frame_id'][0].item()))
-                    imageio.imwrite(depth_vis_path, (rendered_depth_vis*255.).astype(np.uint8))
-                
+                        cam_dir = os.path.join(scan_dir, 'cam')
+                        os.makedirs(cam_dir, exist_ok = True)
+                        cam_path = os.path.join(cam_dir, '{}_{}_{}.txt'.format(batch['meta']['scene'][b_i], batch['meta']['tar_view'][b_i].item(), batch['meta']['frame_id'][b_i].item()))
+                        ixt = batch['tar_ixt'].detach().cpu().numpy()[b_i]
+                        ext = batch['tar_ext'].detach().cpu().numpy()[b_i]
+                        write_cam(cam_path, ixt, ext)
+
+                        depth_dir = os.path.join(scan_dir, 'depth')
+                        os.makedirs(depth_dir, exist_ok = True)
+                        depth_path = os.path.join(depth_dir, '{}_{}_{}.pfm'.format(batch['meta']['scene'][b_i], batch['meta']['tar_view'][b_i].item(), batch['meta']['frame_id'][b_i].item()))
+                        depth_vis = depth[b_i].detach().cpu().numpy()
+                        save_pfm(depth_path, depth_vis)
+                        
+                        depth_minmax = [
+                            batch["near_far"].min().detach().cpu().numpy(),
+                            batch["near_far"].max().detach().cpu().numpy(),
+                        ]
+                        rendered_depth_vis, _ = visualize_depth(depth_vis, depth_minmax)
+                        rendered_depth_vis = rendered_depth_vis.permute(1,2,0).detach().cpu().numpy()
+                        depth_vis_path = os.path.join(depth_dir, '{}_{}_{}.png'.format(batch['meta']['scene'][b_i], batch['meta']['tar_view'][b_i].item(), batch['meta']['frame_id'][b_i].item()))
+                        imageio.imwrite(depth_vis_path, (rendered_depth_vis*255.).astype(np.uint8))
             return ret
         else:
             pred_rgb_nb_list = []
-            j=0
-            for _, meta in enumerate(batch['rendering_video_meta']):
+            for v_i, meta in enumerate(batch['rendering_video_meta']):
                 batch['tar_ext'][:,:3] = meta['tar_ext'][:,:3]
                 batch['rays_0'] = meta['rays_0']
                 batch['rays_1'] = meta['rays_1']
                 feats = self.forward_feat(batch['src_inps'])
-                ret = {}
                 depth, std, near_far = None, None, None
                 for i in range(cfg.mvsgs.cas_config.num):
                     H, W = int(H_img*cfg.mvsgs.cas_config.render_scale[i]), int(W_img*cfg.mvsgs.cas_config.render_scale[i])
@@ -184,7 +184,6 @@ class Network(nn.Module):
                     if not cfg.mvsgs.cas_config.render_if[i]:
                         continue
                     rays = utils.build_rays(depth, std, batch, self.training, near_far, i)
-                    # UV(2) +  ray_o (3) + ray_d (3) + ray_near_far (2) + volume_near_far (2)
                     im_feat_level = cfg.mvsgs.cas_config.render_im_feat_level[i]
                     output = self.batchify_rays(
                             rays=rays,
@@ -195,27 +194,26 @@ class Network(nn.Module):
                             level=i,
                             size=(H,W)
                             )
-                    ret_i = {}
-                    world_xyz, rot_out, scale_out, opacity_out, color_out, rgb_vr = output
-                    b_i = 0
-                    render_novel_i_0 = render(meta, b_i, world_xyz[b_i], color_out[b_i], rot_out[b_i], scale_out[b_i], opacity_out[b_i], bg_color=cfg.mvsgs.bg_color)
-                    if cfg.mvsgs.reweighting: 
-                        render_novel_i = (render_novel_i_0 + rgb_vr*4) / 5
-                    else:
-                        render_novel_i = (render_novel_i_0 + rgb_vr) / 2
-                    b=0
-                    video_path = os.path.join(cfg.result_dir, '{}_{}_{}.mp4'.format(batch['meta']['scene'][b], batch['meta']['tar_view'][b].item(), batch['meta']['frame_id'][b].item()))
-                render_novel_i = render_novel_i.permute(1,2,0)
-                if cfg.mvsgs.eval_center:
-                    H_crop, W_crop = int(H_img*0.1), int(W_img*0.1)
-                    render_novel_i = render_novel_i[H_crop:-H_crop, W_crop:-W_crop,:]
-                
-                pred_rgb_nb_list.append((render_novel_i.data.cpu().numpy()*255).astype(np.uint8))
-                
-                img_dir = os.path.join(cfg.result_dir, '{}_{}'.format(batch['meta']['scene'][b], batch['meta']['tar_view'][b].item()))
-                os.makedirs(img_dir,exist_ok=True)
-                j += 1
-                save_path = os.path.join(img_dir,f'{j}.png')
-                PIL.Image.fromarray((render_novel_i.data.cpu().numpy()*255).astype(np.uint8)).save(save_path)
-            imageio.mimwrite(video_path, np.stack(pred_rgb_nb_list), fps=10, quality=10)
-    
+                    if i == cfg.mvsgs.cas_config.num-1:
+                        world_xyz, rot_out, scale_out, opacity_out, color_out, rgb_vr = output
+                        for b_i in range(B):
+                            render_novel_i_0 = render(meta, b_i, world_xyz[b_i], color_out[b_i], rot_out[b_i], scale_out[b_i], opacity_out[b_i], bg_color=cfg.mvsgs.bg_color)
+                            if cfg.mvsgs.reweighting: 
+                                render_novel_i = (render_novel_i_0 + rgb_vr*4) / 5
+                            else:
+                                render_novel_i = (render_novel_i_0 + rgb_vr) / 2
+                            render_novel_i = render_novel_i[b_i].permute(1,2,0)
+                            if cfg.mvsgs.eval_center:
+                                H_crop, W_crop = int(H_img*0.1), int(W_img*0.1)
+                                render_novel_i = render_novel_i[H_crop:-H_crop, W_crop:-W_crop,:]
+                            if v_i == 0:
+                                pred_rgb_nb_list.append([(render_novel_i.data.cpu().numpy()*255).astype(np.uint8)])
+                            else:
+                                pred_rgb_nb_list[b_i].append((render_novel_i.data.cpu().numpy()*255).astype(np.uint8))
+                            img_dir = os.path.join(cfg.result_dir, '{}_{}'.format(batch['meta']['scene'][b_i], batch['meta']['tar_view'][b_i].item()))
+                            os.makedirs(img_dir,exist_ok=True)
+                            save_path = os.path.join(img_dir,f'{len(pred_rgb_nb_list[b_i])}.png')
+                            PIL.Image.fromarray((render_novel_i.data.cpu().numpy()*255).astype(np.uint8)).save(save_path)
+            for b_i in range(B):
+                video_path = os.path.join(cfg.result_dir, '{}_{}_{}.mp4'.format(batch['meta']['scene'][b_i], batch['meta']['tar_view'][b_i].item(), batch['meta']['frame_id'][b_i].item()))
+                imageio.mimwrite(video_path, np.stack(pred_rgb_nb_list[b_i]), fps=10, quality=10)

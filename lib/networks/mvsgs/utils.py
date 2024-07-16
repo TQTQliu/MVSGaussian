@@ -62,7 +62,6 @@ def get_proj_mats(batch, src_scale, tar_scale):
     src_ixt = batch['src_ixts'].clone()
     src_ixt[:, :, :2] *= src_scale
     src_projs = src_ixt @ src_ext[:, :, :3]
-
     tar_ext = batch['tar_ext']
     tar_ixt = batch['tar_ixt'].clone()
     tar_ixt[:, :2] *= tar_scale
@@ -265,12 +264,9 @@ def build_rays_composite(depth, std, batch, training, near_far, level, up_scale=
 def build_feature_volume(feature, batch, D, depth, std, near_far, level):
     B, S, C, H, W = feature.shape
     depth_values, near_far = get_depth_values(batch, D, level, feature.device, depth, std, near_far)
-
     proj_mats = get_proj_mats(batch, src_scale=cfg.mvsgs.cas_config.im_feat_scale[level], tar_scale=cfg.mvsgs.cas_config.volume_scale[level])
-
     volume_sum = 0
     volume_sq_sum = 0
-    count = 0
     for s in range(S):
         feature_s = feature[:, s]
         proj_mat = proj_mats[:, s]

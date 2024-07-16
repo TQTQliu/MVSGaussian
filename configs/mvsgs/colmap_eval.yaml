@@ -1,24 +1,24 @@
 parent_cfg: configs/mvsgs/dtu_pretrain.yaml
 
-train_dataset_module: lib.datasets.tnt.mvsgs
-test_dataset_module: lib.datasets.tnt.mvsgs
+train_dataset_module: lib.datasets.colmap.mvsgs
+test_dataset_module: lib.datasets.colmap.mvsgs
 
 mvsgs:
     eval_center: True
     reweighting: True
-    scale_factor: 500
+    scale_factor: 12
     cas_config:
         render_if: [False, True]
-        volume_planes: [64, 8]
+        volume_planes: [16, 8]
 
 train_dataset:
-    data_root: 'tnt_data'
+    data_root: 'examples'
     split: 'train'
     input_h_w: [640, 960]
     input_ratio: 1.
 
 test_dataset:
-    data_root: 'tnt_data'
+    data_root: 'examples'
     split: 'test'
     input_h_w: [640, 960]
     input_ratio: 1.

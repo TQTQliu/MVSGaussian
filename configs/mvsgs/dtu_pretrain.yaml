@@ -21,6 +21,7 @@ mvsgs:
     train_input_views: [2, 3, 4]
     train_input_views_prob: [0.1, 0.8, 0.1]
     test_input_views: 3
+    scale_factor: 1
     viewdir_agg: True 
     chunk_size: 1000000
     eval_depth: False
@@ -50,14 +51,12 @@ train_dataset:
     data_root: 'mvs_training/dtu/' #
     ann_file: 'data/mvsgs/dtu_train_all.txt'
     split: 'train'
-    batch_size: 1
     input_ratio: 1.
 
 test_dataset:
     data_root: 'mvs_training/dtu/' #
     ann_file: 'data/mvsgs/dtu_val_all.txt'
     split: 'test'
-    batch_size: 1
     input_ratio: 1.
 
 train:

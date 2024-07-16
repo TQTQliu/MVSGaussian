@@ -5,6 +5,7 @@ import torch
 import math
 import torch.distributed as dist
 from lib.config import cfg
+import random
 
 class mvsgsBatchSampler(Sampler):
     def __init__(self, sampler, batch_size, drop_last, sampler_meta):

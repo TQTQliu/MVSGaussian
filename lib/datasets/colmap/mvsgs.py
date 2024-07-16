@@ -15,10 +15,6 @@ class Dataset:
         self.data_root = os.path.join(cfg.workspace, kwargs['data_root'])
         self.split = kwargs['split']
         self.input_h_w = kwargs['input_h_w']
-        if 'scene' in kwargs:
-            self.scenes = [kwargs['scene']]
-        else:
-            self.scenes = []
         self.scale_factor = cfg.mvsgs.scale_factor
         self.build_metas()
         self.zfar = 100.0
@@ -27,49 +23,42 @@ class Dataset:
         self.scale = 1.0
 
     def build_metas(self):
-        if len(self.scenes) == 0:
-            scenes = ['fern', 'flower', 'fortress', 'horns', 'leaves', 'orchids', 'room', 'trex']
-        else:
-            scenes = self.scenes
         self.scene_infos = {}
         self.metas = []
-        pairs = torch.load('data/mvsgs/pairs.th')
-        for scene in scenes:
+        scene = os.path.basename(self.data_root)
+        img_dir = os.path.join(self.data_root, 'images')
+        img_len = len(os.listdir(img_dir))
+        #
+        render_ids = [j for j in range(img_len//8, img_len, img_len//4)] 
+        train_ids = [j for j in range(img_len) if j not in render_ids]
+        #
+        pose_bounds = np.load(os.path.join(self.data_root, 'poses_bounds.npy')) # c2w, -u, r, -t
+        poses = pose_bounds[:, :15].reshape((-1, 3, 5))
+        c2ws = np.eye(4)[None].repeat(len(poses), 0)
+        c2ws[:, :3, 0], c2ws[:, :3, 1], c2ws[:, :3, 2], c2ws[:, :3, 3] = poses[:, :3, 1], poses[:, :3, 0], -poses[:, :3, 2], poses[:, :3, 3]
+        ixts = np.eye(3)[None].repeat(len(poses), 0)
+        ixts[:, 0, 0], ixts[:, 1, 1] = poses[:, 2, 4], poses[:, 2, 4]
+        ixts[:, 0, 2], ixts[:, 1, 2] = poses[:, 1, 4]/2., poses[:, 0, 4]/2.
 
-            pose_bounds = np.load(os.path.join(self.data_root, scene, 'poses_bounds.npy')) # c2w, -u, r, -t
-            poses = pose_bounds[:, :15].reshape((-1, 3, 5))
-            c2ws = np.eye(4)[None].repeat(len(poses), 0)
-            c2ws[:, :3, 0], c2ws[:, :3, 1], c2ws[:, :3, 2], c2ws[:, :3, 3] = poses[:, :3, 1], poses[:, :3, 0], -poses[:, :3, 2], poses[:, :3, 3]
-            ixts = np.eye(3)[None].repeat(len(poses), 0)
-            ixts[:, 0, 0], ixts[:, 1, 1] = poses[:, 2, 4], poses[:, 2, 4]
-            ixts[:, 0, 2], ixts[:, 1, 2] = poses[:, 1, 4]/2., poses[:, 0, 4]/2.
-            ixts[:, :2] *= 0.25
+        img_paths = sorted([item for item in os.listdir(os.path.join(self.data_root, 'images')) if '.png' in item])
+        depth_ranges = pose_bounds[:, -2:]
+        scene_info = {'ixts': ixts.astype(np.float32), 'c2ws': c2ws.astype(np.float32), 'image_names': img_paths, 'depth_ranges': depth_ranges.astype(np.float32)}
+        scene_info['scene_name'] = scene
+        self.scene_infos[scene] = scene_info
 
-            img_paths = sorted([item for item in os.listdir(os.path.join(self.data_root, scene, 'images_4')) if '.png' in item])
-            depth_ranges = pose_bounds[:, -2:]
-            scene_info = {'ixts': ixts.astype(np.float32), 'c2ws': c2ws.astype(np.float32), 'image_names': img_paths, 'depth_ranges': depth_ranges.astype(np.float32)}
-            scene_info['scene_name'] = scene
-            self.scene_infos[scene] = scene_info
-
-            train_ids = pairs[f'{scene}_train']
+        c2ws = c2ws[train_ids]
+        for i in render_ids:
+            c2w = scene_info['c2ws'][i]
+            distance = np.linalg.norm((c2w[:3, 3][None] - c2ws[:, :3, 3]), axis=-1)
+            argsorts = distance.argsort()
+            argsorts = argsorts[1:] if i in train_ids else argsorts
             if self.split == 'train':
-                render_ids = train_ids
+                src_views = [train_ids[i] for i in argsorts[:cfg.mvsgs.train_input_views[1]+1]]
             else:
-                render_ids = pairs[f'{scene}_val']
-
-            c2ws = c2ws[train_ids]
-            for i in render_ids:
-                c2w = scene_info['c2ws'][i]
-                distance = np.linalg.norm((c2w[:3, 3][None] - c2ws[:, :3, 3]), axis=-1)
-                argsorts = distance.argsort()
-                argsorts = argsorts[1:] if i in train_ids else argsorts
-                if self.split == 'train':
-                    src_views = [train_ids[i] for i in argsorts[:cfg.mvsgs.train_input_views[1]+1]]
-                else:
-                    src_views = [train_ids[i] for i in argsorts[:cfg.mvsgs.test_input_views]]
-                self.metas += [(scene, i, src_views)]
+                src_views = [train_ids[i] for i in argsorts[:cfg.mvsgs.test_input_views]]
+            self.metas += [(scene, i, src_views)]
     
-    def get_video_rendering_path(self, ref_poses, mode, near_far, train_c2w_all, n_frames=60, rads_scale = 1):
+    def get_video_rendering_path(self, ref_poses, mode, near_far, train_c2w_all, n_frames=60, rads_scale=1.25):
         # loop over batch
         poses_paths = []
         ref_poses = ref_poses[None]
@@ -210,7 +199,7 @@ class Dataset:
         return ixt, w2c, 1
 
     def read_image(self, scene, view_idx):
-        image_path = os.path.join(self.data_root, scene['scene_name'], 'images_4', scene['image_names'][view_idx])
+        image_path = os.path.join(self.data_root, 'images', scene['image_names'][view_idx])
         img = (np.array(imageio.imread(image_path))).astype(np.float32)
         orig_size = img.shape[:2][::-1]
         img = cv2.resize(img, self.input_h_w[::-1], interpolation=cv2.INTER_AREA)

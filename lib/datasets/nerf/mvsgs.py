@@ -20,7 +20,7 @@ class Dataset:
             self.scenes = [kwargs['scene']]
         else:
             self.scenes = []
-        self.scale_factor = 200
+        self.scale_factor = cfg.mvsgs.scale_factor
         self.build_metas()
         self.zfar = 100.0
         self.znear = 0.01
@@ -197,11 +197,15 @@ class Dataset:
         return img, ext, ixt
 
     def read_cam(self, scene, view_idx, orig_size):
-        ext = scene['exts'][view_idx]
+        ext = scene['exts'][view_idx].astype(np.float32)
+        ext[:3,3] *= self.scale_factor 
         ixt = scene['ixts'][view_idx]
         ixt[0] *= self.input_h_w[1] / orig_size[0]
         ixt[1] *= self.input_h_w[0] / orig_size[1]
-        ext[:3,3] *= self.scale_factor 
+        # ext[:3,3] *= self.scale_factor 
+        
+        # ext_ = ext.copy()
+        # ext_[:3,3] *= self.scale_factor 
         return ixt, ext
 
     def read_image(self, scene, view_idx):

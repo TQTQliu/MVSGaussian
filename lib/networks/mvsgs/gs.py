@@ -50,7 +50,6 @@ class GS(nn.Module):
         H,W = size
         B, N_points, N_views = img_feat_rgb_dir.shape[:-1]
         S = img_feat_rgb_dir.shape[2]
-        
         img_feat = self.agg(img_feat_rgb_dir)
         x = torch.cat((vox_feat, img_feat), dim=-1)
         
@@ -61,31 +60,29 @@ class GS(nn.Module):
             z_vals = 1./torch.clamp_min(z_vals, 1e-6) # to disp
         depth = z_vals.permute(0,3,1,2)
         
-        
         # sigma head
         sigma = self.sigma(x)
         
         # radiance head
         x0 = x.unsqueeze(2).repeat(1,1,S,1)
-        x0 = x0.reshape(-1,S,self.head_dim).unsqueeze(0)
         x0 = torch.cat((x0, img_feat_rgb_dir), dim=-1)
         color_weight = F.softmax(self.color(x0), dim=-2)
         radiance = torch.sum((img_feat_rgb_dir[..., -7:-4] * color_weight), dim=-2)
         
         # volume rendering branch
-        sigma = sigma.reshape(H*W,d)
+        sigma = sigma.reshape(B,H*W,d)
         raw2alpha = lambda raw: 1.-torch.exp(-raw)
         alpha = raw2alpha(sigma)  # [N_rays, N_samples]
         T = torch.cumprod(1.-alpha+1e-10, dim=-1)[..., :-1]
         T = torch.cat([torch.ones_like(alpha[..., 0:1]), T], dim=-1)
         weights = alpha * T
-        radiance = radiance.reshape(H*W,d,3)
-        rgb_vr = torch.sum(weights[...,None] * radiance, -2)  # [N_rays, 3]
-        rgb_vr = rgb_vr.reshape(H,W,3).permute(2,0,1)
+        radiance = radiance.reshape(B,H*W,d,3)
+        rgb_vr = torch.sum(weights[...,None] * radiance, -2) 
+        rgb_vr = rgb_vr.reshape(B,H,W,3).permute(0,3,1,2)
         
         # enhance features using a UNet
         x = x.reshape(B,H*W,d,x.shape[-1])
-        x = torch.sum(weights[...,None].unsqueeze(0) * x, -2)  # [N_rays, 3]
+        x = torch.sum(weights[...,None].unsqueeze(0) * x, -2) 
         x = x.reshape(B,H,W,x.shape[-1]).permute(0,3,1,2)
         x = self.Unet(x)
         x = x.flatten(-2).permute(0,2,1)
@@ -103,12 +100,12 @@ class GS(nn.Module):
         opacity_out = self.opacity_head(x)
         
         # color head
-        x0 = torch.cat((x,rgb_vr.flatten(1).permute(1,0)[None]),dim=-1)
+        x0 = torch.cat((x,rgb_vr.flatten(2).permute(0,2,1)),dim=-1)
         color_out = self.color_gs(x0)
         
         # world_xyz
-        weights = weights.reshape(H,W,d).permute(2,0,1)
-        depth = torch.sum(weights[None] * depth, 1) # B H W
+        weights = weights.reshape(B,H,W,d).permute(0,3,1,2)
+        depth = torch.sum(weights * depth, 1) # B H W
         ext = batch['tar_ext']
         ixt = batch['tar_ixt'].clone()
         ixt[:,:2] *= cfg.mvsgs.cas_config.render_scale[level]

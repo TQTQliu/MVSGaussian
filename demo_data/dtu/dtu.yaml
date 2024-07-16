@@ -1,5 +1,0 @@
-volume_planes: [48, 8]
-scale_factor: 1
-reweighting: False
-eval_center: False
-render_if: [False, True]

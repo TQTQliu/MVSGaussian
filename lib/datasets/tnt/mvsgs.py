@@ -18,7 +18,7 @@ class Dataset:
             self.scenes = [kwargs['scene']]
         else:
             self.scenes = []
-        self.scale_factor = 500
+        self.scale_factor = cfg.mvsgs.scale_factor
         self.build_metas()
         self.zfar = 100.0
         self.znear = 0.01
