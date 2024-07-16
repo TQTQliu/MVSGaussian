@@ -93,7 +93,7 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
   ```
   Tip: If you already have sparse reconstruction results, i.e. `sparse/0/cameras.bin, sparse/0/images.bin, sparse/0/points3D.bin`, and want to skip the colmap reconstruction step of the script, you can 
   place the above `sparse` folder in the `examples/scene1` directory and run the same command. The script recognizes that sparse reconstruction results already exist, automatically skips the colmap 
-  reconstruction phase, and simply organizes the existing results to produce the required 'poses_bounds.npy'.
+  reconstruction phase, and simply organizes the existing results to produce the required `poses_bounds.npy`.
     
   And execute the following command to obtain novel views:
   ```
