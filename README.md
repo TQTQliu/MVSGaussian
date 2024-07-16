@@ -16,7 +16,7 @@ MVSGaussian: Fast Generalizable Gaussian Splatting Reconstruction from Multi-Vie
 <div>
 <div align="center">
     <sup>1</sup>Huazhong University of Science and Technology&emsp;
-    <sup>2</sup>Nanyang Technological University<br>
+    <sup>2</sup>S-Lab, Nanyang Technological University<br>
     <sup>3</sup>Great Bay University&emsp;
     <sup>4</sup>Shanghai AI Laboratory
 </div>
@@ -45,7 +45,7 @@ MVSGaussian: Fast Generalizable Gaussian Splatting Reconstruction from Multi-Vie
 </div>
 
 ## ⚡ Updates
-+ [2024.07.16] The latest updated code supports multi-batch training (**[details](https://github.com/TQTQliu/MVSGaussian#-training)**) and inference, and **a single 3090 GPU** is sufficient to reproduce all of our experimental results.
++ [2024.07.16] The latest updated code supports multi-batch training (**[details](https://github.com/TQTQliu/MVSGaussian#-training)**) and inference, and **a single RTX 3090 GPU** is sufficient to reproduce all of our experimental results.
 + [2024.07.16] Added a **[Demo (Custom Data)](https://github.com/TQTQliu/MVSGaussian#-demo-custom-data)** that only requires multi-view images as input.
 + [2024.07.10] Code and checkpoints are released.
 + [2024.07.01] Our work is accepted by ECCV2024.
