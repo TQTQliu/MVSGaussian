@@ -91,6 +91,10 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
   ```
   python lib/colmap/imgs2poses.py -s examples/scene1
   ```
+  Tip: If you already have sparse reconstruction results, i.e. `sparse/0/cameras.bin, sparse/0/images.bin, sparse/0/points3D.bin`, and want to skip the colmap reconstruction step of the script, you can 
+  place the above `sparse` folder in the `examples/scene1` directory and run the same command. The script recognizes that sparse reconstruction results already exist, automatically skips the colmap 
+  reconstruction phase, and simply organizes the existing results to produce the required 'poses_bounds.npy'.
+    
   And execute the following command to obtain novel views:
   ```
   python run.py --type evaluate --cfg_file configs/mvsgs/colmap_eval.yaml test_dataset.data_root examples/scene1
