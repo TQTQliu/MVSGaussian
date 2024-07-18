@@ -32,6 +32,8 @@ class Dataset:
         render_ids = [j for j in range(img_len//8, img_len, img_len//4)] 
         train_ids = [j for j in range(img_len) if j not in render_ids]
         #
+        if self.split == 'train':
+            render_ids = train_ids
         pose_bounds = np.load(os.path.join(self.data_root, 'poses_bounds.npy')) # c2w, -u, r, -t
         poses = pose_bounds[:, :15].reshape((-1, 3, 5))
         c2ws = np.eye(4)[None].repeat(len(poses), 0)
