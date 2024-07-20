@@ -103,6 +103,12 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
   ```
   python run.py --type evaluate --cfg_file configs/mvsgs/colmap_eval.yaml test_dataset.data_root examples/scene1 save_video True
   ```
+  If you want to train our model on your own data, you can execute the following commands:
+  ```
+    python train_net.py --cfg_file configs/mvsgs/colmap_eval.yaml train_dataset.data_root examples/scene1 test_dataset.data_root examples/scene1
+  ```
+  More notes about training can be found [below](https://github.com/TQTQliu/MVSGaussian#-training).
+
 ## 📦 Datasets
 
 + DTU
@@ -127,7 +133,7 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
   ```
   python train_net.py --cfg_file configs/mvsgs/dtu_pretrain.yaml train.batch_size 4
   ```
-  You can specify the `gpus` in `configs/mvsgs/dtu_pretrain.yaml`.
+  You can specify the [`gpus`](https://github.com/TQTQliu/MVSGaussian/blob/823713141181fd68ef05ab188ed36bf7f1045ea5/configs/mvsgs/dtu_pretrain.yaml#L2) in `configs/mvsgs/dtu_pretrain.yaml`. And you can modify the [`exp_name`](https://github.com/TQTQliu/MVSGaussian/blob/823713141181fd68ef05ab188ed36bf7f1045ea5/configs/mvsgs/dtu_pretrain.yaml#L3) in the `configs/mvsgs/dtu_pretrain.yaml`. Before training, the code will first check whether there is checkpoint in `trained_model/mvsgs/exp_name`, and if so, the latest checkpoint will be loaded. During training, the tensorboard log will be save in `record/mvsgs/exp_name`, the trained checkpoint will be save in `trained_model/mvsgs/exp_name`, and the rendering results will be saved in `result/mvsgs/exp_name`.
 
   Our code also supports multi-gpu training. The released pretrained model (paper) was trained with 4 RTX 3090 GPUs with a batch size of 1 for each GPU:
   ```
@@ -137,6 +143,7 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
   ```
   python -m torch.distributed.launch --nproc_per_node=4 train_net.py --cfg_file configs/mvsgs/dtu_pretrain.yaml distributed True gpus 0,1,2,3 train.batch_size 4
   ```
+    
   We provide the results as a **reference** below:
   <table>
   <tr>
