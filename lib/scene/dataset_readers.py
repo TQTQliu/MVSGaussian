@@ -482,8 +482,147 @@ def readColmapCameras_TNT(cam_extrinsics, cam_intrinsics, path, rgb_mapping, siz
     return cam_infos
 
 
+
+def readColmapCameras(cam_extrinsics, cam_intrinsics, images_folder, size=(640, 960), scale_factor=1):
+    cam_infos = []
+    for idx, key in enumerate(cam_extrinsics):
+        sys.stdout.write('\r')
+        # the exact output you're looking for:
+        sys.stdout.write("Reading camera {}/{}".format(idx+1, len(cam_extrinsics)))
+        sys.stdout.flush()
+
+        extr = cam_extrinsics[key]
+        intr = cam_intrinsics[extr.camera_id]
+        h_o, w_o = intr.height, intr.width 
+        height = size[0]
+        width = size[1]
+        
+        uid = intr.id
+        R = np.transpose(qvec2rotmat(extr.qvec))
+        T = np.array(extr.tvec)
+        T = T * scale_factor
+        
+        if intr.model=="SIMPLE_PINHOLE":
+            focal_length_x = intr.params[0]
+            focal_length_x = focal_length_x * width / w_o
+            FovY = focal2fov(focal_length_x, height)
+            FovX = focal2fov(focal_length_x, width)
+        elif intr.model=="PINHOLE":
+            focal_length_x = intr.params[0]
+            focal_length_y = intr.params[1]
+            focal_length_x = focal_length_x * width / w_o
+            focal_length_y = focal_length_y * height / h_o
+            FovY = focal2fov(focal_length_y, height)
+            FovX = focal2fov(focal_length_x, width)
+        elif intr.model=="SIMPLE_RADIAL":
+            focal_length_x = intr.params[0] * width / w_o
+            focal_length_y = intr.params[0] * height / h_o
+            FovY = focal2fov(focal_length_y, height)
+            FovX = focal2fov(focal_length_x, width)
+        else:
+            assert False, "Colmap camera model not handled: only undistorted datasets (PINHOLE or SIMPLE_PINHOLE cameras) supported!"
+
+        image_path = os.path.join(images_folder, os.path.basename(extr.name))
+        image_name = os.path.basename(image_path).split(".")[0]
+        image = Image.open(image_path)
+
+        cam_info = CameraInfo(uid=uid, R=R, T=T, FovY=FovY, FovX=FovX, image=image,
+                              image_path=image_path, image_name=image_name, width=width, height=height)
+        cam_infos.append(cam_info)
+    sys.stdout.write('\n')
+    return cam_infos
+
+def readColmapSceneInfo(path, images, eval, llffhold=8, init_ply=None, video=False, scale_factor=12):
+    try:
+        cameras_extrinsic_file = os.path.join(path, "sparse/0", "images.bin")
+        cameras_intrinsic_file = os.path.join(path, "sparse/0", "cameras.bin")
+        cam_extrinsics = read_extrinsics_binary(cameras_extrinsic_file)
+        cam_intrinsics = read_intrinsics_binary(cameras_intrinsic_file)
+    except:
+        cameras_extrinsic_file = os.path.join(path, "sparse/0", "images.txt")
+        cameras_intrinsic_file = os.path.join(path, "sparse/0", "cameras.txt")
+        cam_extrinsics = read_extrinsics_text(cameras_extrinsic_file)
+        cam_intrinsics = read_intrinsics_text(cameras_intrinsic_file)
+
+    reading_dir = "images" if images == None else images
+  
+    if init_ply!='None':
+        cam_infos_unsorted = readColmapCameras(cam_extrinsics=cam_extrinsics, cam_intrinsics=cam_intrinsics, images_folder=os.path.join(path, reading_dir), scale_factor=scale_factor)
+    else:
+        cam_infos_unsorted = readColmapCameras(cam_extrinsics=cam_extrinsics, cam_intrinsics=cam_intrinsics, images_folder=os.path.join(path, reading_dir))
+    cam_infos = sorted(cam_infos_unsorted.copy(), key = lambda x : x.image_name)
+
+    if eval:
+        # train_cam_infos = [c for idx, c in enumerate(cam_infos) if idx % llffhold != 0]
+        # test_cam_infos = [c for idx, c in enumerate(cam_infos) if idx % llffhold == 0]
+        img_len = len(cam_infos)
+        render_ids = [j for j in range(img_len//8, img_len, img_len//4)] 
+        train_ids = [j for j in range(img_len) if j not in render_ids]
+        train_cam_infos = [cam_infos[idx] for idx in train_ids]
+        test_cam_infos = [cam_infos[idx] for idx in render_ids]
+    else:
+        train_cam_infos = cam_infos
+        test_cam_infos = []
+    
+    if video:
+        cam_infos_render_vd = []
+        cur_c2ws_all = []
+        for train_cam in train_cam_infos:
+            R, T = train_cam.R, train_cam.T
+            w2c = np.eye(4)
+            w2c[:3,:3] = R
+            w2c[:3,3] = T
+            c2w = np.linalg.inv(w2c)
+            cur_c2ws_all.append(c2w)
+        cur_c2ws_all = np.stack(cur_c2ws_all)
+        pose_bounds = np.load(os.path.join(path, 'poses_bounds.npy')) # c2w, -u, r, -t
+        depth_ranges = pose_bounds[:, -2:]
+        if init_ply!='None':
+            depth_ranges = depth_ranges * scale_factor
+        near_far = [depth_ranges.min(),depth_ranges.max()]
+        cur_near_far = near_far
+        cur_path = get_spiral_render_path(cur_c2ws_all, cur_near_far, rads_scale=1.5, N_views=60)
+        # convert back to extrinsics tensor
+        cur_w2cs = np.linalg.inv(cur_path)[:, :3].astype(np.float32)
+        for cur_w2c in cur_w2cs:
+            R = cur_w2c[:,:3]
+            T = cur_w2c[:,3]
+            cam_info = CameraInfo(uid=0, R=R, T=T, FovY=cam_infos[0].FovY, FovX=cam_infos[0].FovX, image=cam_infos[0].image,
+                                image_path=cam_infos[0].image_path, image_name=cam_infos[0].image_name, width=cam_infos[0].width, height=cam_infos[0].height)
+            cam_infos_render_vd.append(cam_info)
+        test_cam_infos = cam_infos_render_vd
+
+    nerf_normalization = getNerfppNorm(train_cam_infos)
+    scene = path.split('/')[-1]
+    if init_ply!='None':
+        ply_path = f'{init_ply}/{scene}/{scene}.ply'
+    else:
+        ply_path = os.path.join(path, "sparse/0/points3D.ply")
+    print(ply_path)
+    bin_path = os.path.join(path, "sparse/0/points3D.bin")
+    txt_path = os.path.join(path, "sparse/0/points3D.txt")
+    if not os.path.exists(ply_path):
+        print("Converting point3d.bin to .ply, will happen only the first time you open the scene.")
+        try:
+            xyz, rgb, _ = read_points3D_binary(bin_path)
+        except:
+            xyz, rgb, _ = read_points3D_text(txt_path)
+        storePly(ply_path, xyz, rgb)
+    try:
+        pcd = fetchPly(ply_path)
+    except:
+        pcd = None
+
+    scene_info = SceneInfo(point_cloud=pcd,
+                           train_cameras=train_cam_infos,
+                           test_cameras=test_cam_infos,
+                           nerf_normalization=nerf_normalization,
+                           ply_path=ply_path)
+    return scene_info
+
 sceneLoadTypeCallbacks = {
     "Blender" : readNerfSyntheticInfo,
     "LLFF": readColmapSceneInfo_LLFF,
-    "TNT": readColmapSceneInfo_TNT
+    "TNT": readColmapSceneInfo_TNT,
+    "Colmap": readColmapSceneInfo
 }
