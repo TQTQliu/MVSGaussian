@@ -113,6 +113,8 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
   ```
   python run.py --type evaluate --cfg_file configs/mvsgs/colmap_eval.yaml test_dataset.data_root examples/scene1 save_ply True dir_ply <path to save ply>
   ```
+  Note that if you modified the value of `scale_factor` in the `configs/mvsgs/colmap_eval.yaml`, please change it accordingly [here](https://github.com/TQTQliu/MVSGaussian/blob/ff71de99ffeb02b57083d67469dd9b1af3577414/lib/scene/dataset_readers.py#L535).
+  
   And then run the 3DGS optimization:
   ```
   python lib/train.py  --eval --iterations <iter> -s examples/scene1 -p <path to save ply>
