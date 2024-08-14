@@ -86,6 +86,7 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
 
 
 ## 🤗 Demo (Custom Data)
+### Inference
 
   First, prepare the multi-view image data, and then run colmap. Here, we take `examples/scene1` ([examples data](https://drive.google.com/drive/folders/1S-Ke5ZI3tfNpuSkumJ1R7LFbb_I8oArD?usp=sharing)) as an example:
   ```
@@ -103,22 +104,26 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
   ```
   python run.py --type evaluate --cfg_file configs/mvsgs/colmap_eval.yaml test_dataset.data_root examples/scene1 save_video True
   ```
+### Train on your own data
   If you want to train our model on your own data, you can execute the following commands:
   ```
   python train_net.py --cfg_file configs/mvsgs/colmap_eval.yaml train_dataset.data_root examples/scene1 test_dataset.data_root examples/scene1
   ```
   You can specify the [`gpus`](https://github.com/TQTQliu/MVSGaussian/blob/823713141181fd68ef05ab188ed36bf7f1045ea5/configs/mvsgs/dtu_pretrain.yaml#L2) in `configs/mvsgs/dtu_pretrain.yaml`. And you can modify the [`exp_name`](https://github.com/TQTQliu/MVSGaussian/blob/823713141181fd68ef05ab188ed36bf7f1045ea5/configs/mvsgs/dtu_pretrain.yaml#L3) in the `configs/mvsgs/dtu_pretrain.yaml`. Before training, the code will first check whether there is checkpoint in `trained_model/mvsgs/exp_name`, and if so, the latest checkpoint will be loaded. During training, the tensorboard log will be save in `record/mvsgs/exp_name`, the trained checkpoint will be save in `trained_model/mvsgs/exp_name`, and the rendering results will be saved in `result/mvsgs/exp_name`.
 
+### Per-scene optimization
   For per-scene optimization, first run the generalizable model to obtain the point cloud as initialization for subsequent optimization.
   ```
   python run.py --type evaluate --cfg_file configs/mvsgs/colmap_eval.yaml test_dataset.data_root examples/scene1 save_ply True dir_ply <path to save ply>
   ```
-  Note that if you modified the value of `scale_factor` in the `configs/mvsgs/colmap_eval.yaml`, please change it accordingly [here](https://github.com/TQTQliu/MVSGaussian/blob/ff71de99ffeb02b57083d67469dd9b1af3577414/lib/scene/dataset_readers.py#L535).
+  The point cloud will be saved in `<path to save ply>/scene1/scene1.ply`. Note that this point cloud is a normal geometric point cloud, not a Gaussian point cloud, and you can open it through [MeshLab](https://www.meshlab.net/).
   
   And then run the 3DGS optimization:
   ```
   python lib/train.py  --eval --iterations <iter> -s examples/scene1 -p <path to save ply>
   ```
+  The optimized Gaussian point cloud will be saved in `output/scene1/point_cloud/iteration_<iter>/point_cloud.ply`, and you can open it through 3DGS viewer.
+  
   Run the following commands to synthesize target views and calculate metrics:
   ```
   python lib/render.py -c -m output/scene1 --iteration <iter> -p <path to save ply>
