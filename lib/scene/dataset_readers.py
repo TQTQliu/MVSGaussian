@@ -70,7 +70,7 @@ def getNerfppNorm(cam_info):
 
     return {"translate": translate, "radius": radius}
 
-def readColmapCameras_LLFF(cam_extrinsics, cam_intrinsics, path, rgb_mapping, size=(640, 960), scale_factor=1):
+def readColmapCameras_LLFF(cam_extrinsics, cam_intrinsics, path, rgb_mapping, size=(640, 960)):
     cam_infos = []
     for idx, key in enumerate(cam_extrinsics):
         sys.stdout.write('\r')
@@ -87,7 +87,6 @@ def readColmapCameras_LLFF(cam_extrinsics, cam_intrinsics, path, rgb_mapping, si
         uid = intr.id
         R = np.transpose(qvec2rotmat(extr.qvec))
         T = np.array(extr.tvec)
-        T = T * scale_factor
         
         if intr.model=="SIMPLE_PINHOLE":
             focal_length_x = intr.params[0]
@@ -145,7 +144,7 @@ def storePly(path, xyz, rgb):
     ply_data = PlyData([vertex_element])
     ply_data.write(path)
 
-def readColmapSceneInfo_LLFF(path, init_ply=None, video=False, scale_factor=12):
+def readColmapSceneInfo_LLFF(path, init_ply=None, video=False):
     try:
         cameras_extrinsic_file = os.path.join(path, "sparse/0", "images.bin")
         cameras_intrinsic_file = os.path.join(path, "sparse/0", "cameras.bin")
@@ -160,12 +159,8 @@ def readColmapSceneInfo_LLFF(path, init_ply=None, video=False, scale_factor=12):
     reading_dir = 'images_4'
     rgb_mapping = [f for f in sorted(glob.glob(os.path.join(path, reading_dir, '*')))
                    if f.endswith('JPG') or f.endswith('jpg') or f.endswith('png')]
-    if init_ply!='None':
-        cam_infos_unsorted = readColmapCameras_LLFF(cam_extrinsics=cam_extrinsics, cam_intrinsics=cam_intrinsics,
-                                path=path, rgb_mapping=rgb_mapping, scale_factor=scale_factor)
-    else:
-        cam_infos_unsorted = readColmapCameras_LLFF(cam_extrinsics=cam_extrinsics, cam_intrinsics=cam_intrinsics,
-                                path=path, rgb_mapping=rgb_mapping)
+    cam_infos_unsorted = readColmapCameras_LLFF(cam_extrinsics=cam_extrinsics, cam_intrinsics=cam_intrinsics,
+                            path=path, rgb_mapping=rgb_mapping)
     cam_infos = sorted(cam_infos_unsorted.copy(), key = lambda x : x.image_name)
     
     pairs = torch.load('data/mvsgs/pairs.th')
@@ -187,8 +182,6 @@ def readColmapSceneInfo_LLFF(path, init_ply=None, video=False, scale_factor=12):
         cur_c2ws_all = np.stack(cur_c2ws_all)
         pose_bounds = np.load(os.path.join(path, 'poses_bounds.npy')) # c2w, -u, r, -t
         depth_ranges = pose_bounds[:, -2:]
-        if init_ply!='None':
-            depth_ranges = depth_ranges * scale_factor
         near_far = [depth_ranges.min(),depth_ranges.max()]
         cur_near_far = near_far
         cur_path = get_spiral_render_path(cur_c2ws_all, cur_near_far, rads_scale=1.5, N_views=60)
@@ -229,7 +222,7 @@ def readColmapSceneInfo_LLFF(path, init_ply=None, video=False, scale_factor=12):
     return scene_info
 
 
-def readCamerasFromTransforms(path, transformsfile, white_background, extension=".png", scale_factor=1):
+def readCamerasFromTransforms(path, transformsfile, white_background, extension=".png"):
     cam_infos = []
 
     with open(os.path.join(path, transformsfile)) as json_file:
@@ -247,7 +240,6 @@ def readCamerasFromTransforms(path, transformsfile, white_background, extension=
 
             # get the world-to-camera transform and set R, T
             w2c = np.linalg.inv(c2w)
-            w2c[:3,3] *= scale_factor 
             R = np.transpose(w2c[:3,:3])  # R is stored transposed due to 'glm' in CUDA code
             T = w2c[:3, 3]
 
@@ -271,11 +263,8 @@ def readCamerasFromTransforms(path, transformsfile, white_background, extension=
             
     return cam_infos
 
-def readNerfSyntheticInfo(path, white_background, eval, extension=".png", init_ply=None, video=False, center_idx=0, scale_factor=200):
-    if init_ply!='None':
-        cam_infos = readCamerasFromTransforms(path, "transforms_train.json", white_background, extension, scale_factor=scale_factor)
-    else:
-        cam_infos = readCamerasFromTransforms(path, "transforms_train.json", white_background, extension)
+def readNerfSyntheticInfo(path, white_background, eval, extension=".png", init_ply=None, video=False, center_idx=0):
+    cam_infos = readCamerasFromTransforms(path, "transforms_train.json", white_background, extension)
     pairs = torch.load('data/mvsgs/pairs.th')
     scene = path.split('/')[-1]
     train_ids, render_ids = pairs[f'{scene}_train'], pairs[f'{scene}_val']
@@ -358,7 +347,7 @@ def readNerfSyntheticInfo(path, white_background, eval, extension=".png", init_p
     return scene_info
 
 
-def readColmapSceneInfo_TNT(path, init_ply=None, scale_factor = 500):
+def readColmapSceneInfo_TNT(path, init_ply=None):
     try:
         cameras_extrinsic_file = os.path.join(path, "sparse/0", "images.bin")
         cameras_intrinsic_file = os.path.join(path, "sparse/0", "cameras.bin")
@@ -373,12 +362,8 @@ def readColmapSceneInfo_TNT(path, init_ply=None, scale_factor = 500):
     reading_dir = 'images'
     rgb_mapping = [f for f in sorted(glob.glob(os.path.join(path, reading_dir, '*')))
                    if f.endswith('JPG') or f.endswith('jpg') or f.endswith('png')]
-    if init_ply!='None':
-        cam_infos_unsorted = readColmapCameras_TNT(cam_extrinsics=cam_extrinsics, cam_intrinsics=cam_intrinsics,
-                                path=path, rgb_mapping=rgb_mapping, scale_factor=scale_factor, init_ply=init_ply)
-    else:
-        cam_infos_unsorted = readColmapCameras_TNT(cam_extrinsics=cam_extrinsics, cam_intrinsics=cam_intrinsics,
-                                path=path, rgb_mapping=rgb_mapping, init_ply=init_ply)
+    cam_infos_unsorted = readColmapCameras_TNT(cam_extrinsics=cam_extrinsics, cam_intrinsics=cam_intrinsics,
+                            path=path, rgb_mapping=rgb_mapping, init_ply=init_ply)
     cam_infos = sorted(cam_infos_unsorted.copy(), key = lambda x : x.image_name)
         
     pairs = torch.load('data/mvsgs/pairs.th')
@@ -416,7 +401,7 @@ def readColmapSceneInfo_TNT(path, init_ply=None, scale_factor = 500):
     return scene_info
 
 
-def readColmapCameras_TNT(cam_extrinsics, cam_intrinsics, path, rgb_mapping, size=(640, 960), scale_factor=1, init_ply=None):
+def readColmapCameras_TNT(cam_extrinsics, cam_intrinsics, path, rgb_mapping, size=(640, 960), init_ply=None):
     cam_infos = []
     for idx, key in enumerate(cam_extrinsics):
         sys.stdout.write('\r')
@@ -442,7 +427,6 @@ def readColmapCameras_TNT(cam_extrinsics, cam_intrinsics, path, rgb_mapping, siz
             focal_length_y = intrinsics[1,1]
             FovY = focal2fov(focal_length_y, height)
             FovX = focal2fov(focal_length_x, width)
-            extrinsics[:3,3] *= scale_factor 
             R = np.array(extrinsics[:3, :3], np.float32).reshape(3, 3).transpose(1, 0)
             T = np.array(extrinsics[:3, 3], np.float32)
         else:
@@ -483,7 +467,7 @@ def readColmapCameras_TNT(cam_extrinsics, cam_intrinsics, path, rgb_mapping, siz
 
 
 
-def readColmapCameras(cam_extrinsics, cam_intrinsics, images_folder, size=(640, 960), scale_factor=1):
+def readColmapCameras(cam_extrinsics, cam_intrinsics, images_folder, size=(640, 960)):
     cam_infos = []
     for idx, key in enumerate(cam_extrinsics):
         sys.stdout.write('\r')
@@ -500,7 +484,6 @@ def readColmapCameras(cam_extrinsics, cam_intrinsics, images_folder, size=(640, 
         uid = intr.id
         R = np.transpose(qvec2rotmat(extr.qvec))
         T = np.array(extr.tvec)
-        T = T * scale_factor
         
         if intr.model=="SIMPLE_PINHOLE":
             focal_length_x = intr.params[0]
@@ -532,7 +515,7 @@ def readColmapCameras(cam_extrinsics, cam_intrinsics, images_folder, size=(640, 
     sys.stdout.write('\n')
     return cam_infos
 
-def readColmapSceneInfo(path, images, eval, llffhold=8, init_ply=None, video=False, scale_factor=12):
+def readColmapSceneInfo(path, images, eval, llffhold=8, init_ply=None, video=False):
     try:
         cameras_extrinsic_file = os.path.join(path, "sparse/0", "images.bin")
         cameras_intrinsic_file = os.path.join(path, "sparse/0", "cameras.bin")
@@ -546,10 +529,7 @@ def readColmapSceneInfo(path, images, eval, llffhold=8, init_ply=None, video=Fal
 
     reading_dir = "images" if images == None else images
   
-    if init_ply!='None':
-        cam_infos_unsorted = readColmapCameras(cam_extrinsics=cam_extrinsics, cam_intrinsics=cam_intrinsics, images_folder=os.path.join(path, reading_dir), scale_factor=scale_factor)
-    else:
-        cam_infos_unsorted = readColmapCameras(cam_extrinsics=cam_extrinsics, cam_intrinsics=cam_intrinsics, images_folder=os.path.join(path, reading_dir))
+    cam_infos_unsorted = readColmapCameras(cam_extrinsics=cam_extrinsics, cam_intrinsics=cam_intrinsics, images_folder=os.path.join(path, reading_dir))
     cam_infos = sorted(cam_infos_unsorted.copy(), key = lambda x : x.image_name)
 
     if eval:
@@ -577,8 +557,6 @@ def readColmapSceneInfo(path, images, eval, llffhold=8, init_ply=None, video=Fal
         cur_c2ws_all = np.stack(cur_c2ws_all)
         pose_bounds = np.load(os.path.join(path, 'poses_bounds.npy')) # c2w, -u, r, -t
         depth_ranges = pose_bounds[:, -2:]
-        if init_ply!='None':
-            depth_ranges = depth_ranges * scale_factor
         near_far = [depth_ranges.min(),depth_ranges.max()]
         cur_near_far = near_far
         cur_path = get_spiral_render_path(cur_c2ws_all, cur_near_far, rads_scale=1.5, N_views=60)
