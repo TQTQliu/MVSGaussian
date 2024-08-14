@@ -138,14 +138,15 @@ class Network(nn.Module):
                         img = (img*255).astype(np.uint8)
                         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
                         cv2.imwrite(img_path, img)
-                    
                         cam_dir = os.path.join(scan_dir, 'cam')
                         os.makedirs(cam_dir, exist_ok = True)
                         cam_path = os.path.join(cam_dir, '{}_{}_{}.txt'.format(batch['meta']['scene'][b_i], batch['meta']['tar_view'][b_i].item(), batch['meta']['frame_id'][b_i].item()))
                         ixt = batch['tar_ixt'].detach().cpu().numpy()[b_i]
                         ext = batch['tar_ext'].detach().cpu().numpy()[b_i]
+                        ext[:3,3] /= cfg.mvsgs.scale_factor
                         write_cam(cam_path, ixt, ext)
 
+                        depth /= cfg.mvsgs.scale_factor
                         depth_dir = os.path.join(scan_dir, 'depth')
                         os.makedirs(depth_dir, exist_ok = True)
                         depth_path = os.path.join(depth_dir, '{}_{}_{}.pfm'.format(batch['meta']['scene'][b_i], batch['meta']['tar_view'][b_i].item(), batch['meta']['frame_id'][b_i].item()))
@@ -153,8 +154,8 @@ class Network(nn.Module):
                         save_pfm(depth_path, depth_vis)
                         
                         depth_minmax = [
-                            batch["near_far"].min().detach().cpu().numpy(),
-                            batch["near_far"].max().detach().cpu().numpy(),
+                            batch["near_far"].min().detach().cpu().numpy()/cfg.mvsgs.scale_factor,
+                            batch["near_far"].max().detach().cpu().numpy()/cfg.mvsgs.scale_factor,
                         ]
                         rendered_depth_vis, _ = visualize_depth(depth_vis, depth_minmax)
                         rendered_depth_vis = rendered_depth_vis.permute(1,2,0).detach().cpu().numpy()
