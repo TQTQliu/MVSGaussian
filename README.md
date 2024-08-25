@@ -64,7 +64,7 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
 ### Clone our repository
 
   ```
-  git clone https://github.com/TQTQliu/MVSGaussian.git --recursive
+  git clone https://github.com/TQTQliu/MVSGaussian.git
   cd MVSGaussian
   ```
 
