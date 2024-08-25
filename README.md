@@ -64,7 +64,7 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
 ### Clone our repository
 
   ```
-  git clone https://github.com/TQTQliu/MVSGaussian.git
+  git clone https://github.com/TQTQliu/MVSGaussian.git --recursive
   cd MVSGaussian
   ```
 
@@ -79,9 +79,8 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
 
 ### Install [Gaussian Splatting](https://github.com/graphdeco-inria/gaussian-splatting) renderer
   ```
-  git clone https://github.com/graphdeco-inria/gaussian-splatting --recursive
-  pip install gaussian-splatting/submodules/diff-gaussian-rasterization
-  pip install gaussian-splatting/submodules/simple-knn
+  pip install lib/submodules/diff-gaussian-rasterization
+  pip install lib/submodules/simple-knn
   ```
 
 

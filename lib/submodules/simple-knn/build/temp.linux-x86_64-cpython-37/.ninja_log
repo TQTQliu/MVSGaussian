@@ -1,0 +1,7 @@
+# ninja log v5
+1	12340	1720415733578476638	/data4/liutianqi/CODE/GS/eccv24/mvsgs_code/gaussian-splatting/submodules/simple-knn/build/temp.linux-x86_64-cpython-37/simple_knn.o	3c4735ad93112d31
+0	27463	1720415748694324481	/data4/liutianqi/CODE/GS/eccv24/mvsgs_code/gaussian-splatting/submodules/simple-knn/build/temp.linux-x86_64-cpython-37/ext.o	c27f2fd89db3c4b6
+1	49959	1720415771202095788	/data4/liutianqi/CODE/GS/eccv24/mvsgs_code/gaussian-splatting/submodules/simple-knn/build/temp.linux-x86_64-cpython-37/spatial.o	bb48e93b3c1bf100
+6	10240	1724567350061864171	/data4/liutianqi/CODE/GS/eccv24/new/1/MVSGaussian/submodules/simple-knn/build/temp.linux-x86_64-cpython-37/simple_knn.o	a58206f43a2f7e33
+6	22796	1724567362601653805	/data4/liutianqi/CODE/GS/eccv24/new/1/MVSGaussian/submodules/simple-knn/build/temp.linux-x86_64-cpython-37/ext.o	a4421765fd41933c
+7	44301	1724567384117294349	/data4/liutianqi/CODE/GS/eccv24/new/1/MVSGaussian/submodules/simple-knn/build/temp.linux-x86_64-cpython-37/spatial.o	e5f9802f620d95e8
