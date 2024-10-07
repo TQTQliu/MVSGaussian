@@ -97,23 +97,28 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
     
   And execute the following command to obtain novel views:
   ```
-  python run.py --type evaluate --cfg_file configs/mvsgs/colmap_eval.yaml test_dataset.data_root examples/scene1
+  python run.py --type evaluate --cfg_file configs/mvsgs/colmap_eval.yaml test_dataset.data_root examples test_dataset.scene scene1
   ```
   or videos:
   ```
-  python run.py --type evaluate --cfg_file configs/mvsgs/colmap_eval.yaml test_dataset.data_root examples/scene1 save_video True
+  python run.py --type evaluate --cfg_file configs/mvsgs/colmap_eval.yaml test_dataset.data_root examples test_dataset.scene scene1 save_video True
+  ```
+
+  For your own dataset with many scenes, first modify the scenes list [here]() and then run
+  ```
+  python run.py --type evaluate --cfg_file configs/mvsgs/colmap_eval.yaml test_dataset.data_root examples
   ```
 ### Train on your own data
-  If you want to train our model on your own data, you can execute the following commands:
+  If you want to train our model on your own dataset, first modify the scenes list [here]() and then execute the following commands:
   ```
-  python train_net.py --cfg_file configs/mvsgs/colmap_eval.yaml train_dataset.data_root examples/scene1 test_dataset.data_root examples/scene1
+  python train_net.py --cfg_file configs/mvsgs/colmap_eval.yaml train_dataset.data_root examples test_dataset.data_root examples
   ```
   You can specify the [`gpus`](https://github.com/TQTQliu/MVSGaussian/blob/823713141181fd68ef05ab188ed36bf7f1045ea5/configs/mvsgs/dtu_pretrain.yaml#L2) in `configs/mvsgs/dtu_pretrain.yaml`. And you can modify the [`exp_name`](https://github.com/TQTQliu/MVSGaussian/blob/823713141181fd68ef05ab188ed36bf7f1045ea5/configs/mvsgs/dtu_pretrain.yaml#L3) in the `configs/mvsgs/dtu_pretrain.yaml`. Before training, the code will first check whether there is checkpoint in `trained_model/mvsgs/exp_name`, and if so, the latest checkpoint will be loaded. During training, the tensorboard log will be save in `record/mvsgs/exp_name`, the trained checkpoint will be save in `trained_model/mvsgs/exp_name`, and the rendering results will be saved in `result/mvsgs/exp_name`.
 
 ### Per-scene optimization
   For per-scene optimization, first run the generalizable model to obtain the point cloud as initialization for subsequent optimization.
   ```
-  python run.py --type evaluate --cfg_file configs/mvsgs/colmap_eval.yaml test_dataset.data_root examples/scene1 save_ply True dir_ply <path to save ply>
+  python run.py --type evaluate --cfg_file configs/mvsgs/colmap_eval.yaml test_dataset.data_root examples test_dataset.scene scene1 save_ply True dir_ply <path to save ply>
   ```
   The point cloud will be saved in `<path to save ply>/scene1/scene1.ply`. Note that this point cloud is a normal geometric point cloud, not a Gaussian point cloud, and you can open it through [MeshLab](https://www.meshlab.net/).
   
