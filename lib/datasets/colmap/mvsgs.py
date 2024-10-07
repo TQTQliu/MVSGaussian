@@ -15,7 +15,7 @@ class Dataset:
         self.data_root = os.path.join(cfg.workspace, kwargs['data_root'])
         self.split = kwargs['split']
         self.input_h_w = kwargs['input_h_w']
-        if 'scene' in kwargs:
+        if 'scene' in kwargs and kwargs['scene']:
             self.scenes = [kwargs['scene']]
         else:
             self.scenes = []
