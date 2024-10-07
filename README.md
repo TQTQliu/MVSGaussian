@@ -104,7 +104,7 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
   python run.py --type evaluate --cfg_file configs/mvsgs/colmap_eval.yaml test_dataset.data_root examples test_dataset.scene scene1 save_video True
   ```
 
-  For your own dataset with many scenes, like:
+  For your own dataset, like:
   ```
   data
     ├── scene1                   
