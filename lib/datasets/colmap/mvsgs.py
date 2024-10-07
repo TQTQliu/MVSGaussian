@@ -52,8 +52,11 @@ class Dataset:
             self.scene_infos[scene] = scene_info
             img_len = len(img_paths)
             ### set your own train_ids and render_ids
-            render_ids = [j for j in range(img_len//8, img_len, img_len//4)] 
             train_ids = [j for j in range(img_len) if j not in render_ids]
+            if self.split == 'train':
+                render_ids = train_ids
+            else:
+                render_ids = [j for j in range(img_len//8, img_len, img_len//4)] 
             #
             c2ws = c2ws[train_ids]
             for i in render_ids:
