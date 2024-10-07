@@ -115,7 +115,7 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
    ├── scene2
     ...
   ```
-  First modify the scenes list [here](https://github.com/TQTQliu/MVSGaussian/blob/47df5632b723d36a78b422370706ea6221c72e8f/lib/datasets/colmap/mvsgs.py#L32) and then run
+  First modify the scenes list [here](https://github.com/TQTQliu/MVSGaussian/blob/e06a8234381d812c50bb7f7975083ea7a27f77a4/lib/datasets/colmap/mvsgs.py#L32) and then run
   ```
   python run.py --type evaluate --cfg_file configs/mvsgs/colmap_eval.yaml test_dataset.data_root examples
   ```
@@ -131,7 +131,7 @@ Specifically, 1) we leverage MVS to encode geometry-aware Gaussian representatio
    ├── scene2
     ...
   ```
-  Modify the scenes list [here](https://github.com/TQTQliu/MVSGaussian/blob/47df5632b723d36a78b422370706ea6221c72e8f/lib/datasets/colmap/mvsgs.py#L32) and then execute the following commands:
+  Modify the scenes list [here](https://github.com/TQTQliu/MVSGaussian/blob/e06a8234381d812c50bb7f7975083ea7a27f77a4/lib/datasets/colmap/mvsgs.py#L32) and then execute the following commands:
   ```
   python train_net.py --cfg_file configs/mvsgs/colmap_eval.yaml train_dataset.data_root examples test_dataset.data_root examples
   ```
