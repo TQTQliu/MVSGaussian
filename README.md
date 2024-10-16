@@ -363,11 +363,13 @@ For optimized Gaussians, add `-v` to save videos, such as:
 If you find our work useful for your research, please cite our paper.
 
 ```
-@article{liu2024mvsgaussian,
-    title={MVSGaussian: Fast Generalizable Gaussian Splatting Reconstruction from Multi-View Stereo},
-    author={Liu, Tianqi and Wang, Guangcong and Hu, Shoukang and Shen, Liao and Ye, Xinyi and Zang, Yuhang and Cao, Zhiguo and Li, Wei and Liu, Ziwei},
-    journal={arXiv preprint arXiv:2405.12218},
-    year={2024}
+@inproceedings{liu2025mvsgaussian,
+  title={MVSGaussian: Fast Generalizable Gaussian Splatting Reconstruction from Multi-View Stereo},
+  author={Liu, Tianqi and Wang, Guangcong and Hu, Shoukang and Shen, Liao and Ye, Xinyi and Zang, Yuhang and Cao, Zhiguo and Li, Wei and Liu, Ziwei},
+  booktitle={European Conference on Computer Vision},
+  pages={37--53},
+  year={2025},
+  organization={Springer}
 }
 ```
 
