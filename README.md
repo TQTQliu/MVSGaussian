@@ -34,18 +34,19 @@ MVSGaussian: Fast Generalizable Gaussian Splatting Reconstruction from Multi-Vie
   <a href="https://mp.weixin.qq.com/s/Y9uXxNMgliV9p-ne_bGpEw">
     <img src="https://img.shields.io/badge/中文解读-机器之心-blue">
   </a>
+  <a href="https://eccv.ecva.net/virtual/2024/poster/177">
+    <img src="https://img.shields.io/badge/ECCV2024-Poster-red">
+  </a>
    <a href="#">
     <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FTQTQliu%2FMVSGaussian&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=visitors&edge_flat=false">
   </a>
 </p>
 
->**TL;DR**: <em>MVSGaussian is a Gaussian-based method designed for efficient reconstruction of unseen scenes from sparse views in a single forward pass. It offers high-quality initialization for fast training and real-time rendering.</em>
-<div style="text-align:center">
-<img src="assets/ft_process.gif" width="100%" height="100%"/>
-</div>
+>**TL;DR**: <em>MVSGaussian is a Gaussian-based method designed for efficient reconstruction of unseen scenes from sparse views <u>in a single forward pass</u>. It also offers high-quality initialization for fast training and real-time rendering.</em>
+
 
 ## ⚡ Updates
-+ [2024.07.16] The latest updated code supports multi-batch training (**[details](https://github.com/TQTQliu/MVSGaussian#-training)**) and inference, and **a single RTX 3090 GPU** is sufficient to reproduce all of our experimental results.
++ [2024.07.16] The latest updated code supports multi-batch training (**[details](https://github.com/TQTQliu/MVSGaussian#-training)**) and inference, and a single RTX 3090 GPU is sufficient to reproduce all of our experimental results.
 + [2024.07.16] Added a **[Demo (Custom Data)](https://github.com/TQTQliu/MVSGaussian#-demo-custom-data)** that only requires multi-view images as input.
 + [2024.07.10] Code and checkpoints are released.
 + [2024.07.01] Our work is accepted by ECCV2024.
@@ -374,7 +375,7 @@ If you find our work useful for your research, please cite our paper.
 ```
 
 ## 😃 Acknowledgement
-This project is built on source codes shared by [Gaussian-Splatting](https://github.com/graphdeco-inria/gaussian-splatting), [ENeRF](https://github.com/zju3dv/enerf/), [MVSNeRF](https://github.com/apchenstu/mvsnerf) and [LLFF](https://github.com/Fyusion/LLFF). Many thanks for their excellent contributions!
+This project is built on source codes shared by [Gaussian-Splatting](https://github.com/graphdeco-inria/gaussian-splatting), [ENeRF](https://github.com/zju3dv/enerf/), [MVSNeRF](https://github.com/apchenstu/mvsnerf), and [LLFF](https://github.com/Fyusion/LLFF). Many thanks for their excellent contributions!
 
 ## 📧 Contact
 If you have any questions, please feel free to contact Tianqi Liu <b>(tq_liu at hust.edu.cn)</b>.
