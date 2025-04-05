@@ -44,9 +44,18 @@ MVSGaussian: Fast Generalizable Gaussian Splatting Reconstruction from Multi-Vie
 
 >**TL;DR**: <em>MVSGaussian is a Gaussian-based method designed for efficient reconstruction of unseen scenes from sparse views in **a single forward pass**. It also offers high-quality initialization for fast training and real-time rendering.</em>
 
+<details>
+<summary>Click to expand feed-forward results</summary>
+
 https://github.com/user-attachments/assets/004dd355-a9c8-477f-9c3a-1d2d11bc43dc
+</details>
+
+<details>
+<summary>Click to expand per-scene optimization comparison</summary>
 
 https://github.com/user-attachments/assets/61683f96-fa91-4d6c-81aa-d0cd84e36050
+</details>
+
 
 ## ⚡ Updates
 + [2024.07.16] The latest updated code supports multi-batch training (**[details](https://github.com/TQTQliu/MVSGaussian#-training)**) and inference, and a single RTX 3090 GPU is sufficient to reproduce all of our experimental results.
