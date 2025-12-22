@@ -37,9 +37,6 @@ MVSGaussian: Fast Generalizable Gaussian Splatting Reconstruction from Multi-Vie
   <a href="https://eccv.ecva.net/virtual/2024/poster/177">
     <img src="https://img.shields.io/badge/ECCV2024-Poster-red">
   </a>
-   <a href="#">
-    <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FTQTQliu%2FMVSGaussian&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=visitors&edge_flat=false">
-  </a>
 </p>
 
 >**TL;DR**: <em>MVSGaussian is a Gaussian-based method designed for efficient reconstruction of unseen scenes from sparse views in **a single forward pass**. It also offers high-quality initialization for fast training and real-time rendering.</em>
@@ -385,6 +382,14 @@ If you find our work useful for your research, please cite our paper.
   organization={Springer}
 }
 ```
+
+## 🔗 Related Papers
+
+You may also be interested in our related work on generalizable NeRF and 3DGS:
+
+- [CVPR 2024] [Geometry-aware Reconstruction and Fusion-refined Rendering for Generalizable Neural Radiance Fields](https://arxiv.org/abs/2404.17528)
+
+- [ICCV 2025] [MuGS: Multi-Baseline Generalizable Gaussian Splatting Reconstruction](https://arxiv.org/abs/2508.04297)
 
 ## 😃 Acknowledgement
 This project is built on source codes shared by [Gaussian-Splatting](https://github.com/graphdeco-inria/gaussian-splatting), [ENeRF](https://github.com/zju3dv/enerf/), [MVSNeRF](https://github.com/apchenstu/mvsnerf), and [LLFF](https://github.com/Fyusion/LLFF). Many thanks for their excellent contributions!
