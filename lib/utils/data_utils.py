@@ -407,8 +407,8 @@ def gaussian_blur(image, sigma):
 
 
 def inter_from_mask(pred, gt):
-    pred = pred.astype(np.bool)
-    gt = gt.astype(np.bool)
+    pred = pred.astype(bool)
+    gt = gt.astype(bool)
     intersection = np.logical_and(gt, pred).sum()
     return intersection
 
